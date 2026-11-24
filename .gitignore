@@ -1,0 +1,13 @@
+# Flutter
+.dart_tool/
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub/
+coverage/
+# Fichiers propres à la machine
+.idea/
+*.iml
+.DS_Store
+Thumbs.db
+*.bundle

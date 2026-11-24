@@ -1,0 +1,27 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "LocalDrop · Flutter (Chrome)",
+      "request": "launch",
+      "type": "dart",
+      "deviceId": "chrome",
+      "program": "lib/main.dart",
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "name": "LocalDrop · Flutter (Edge)",
+      "request": "launch",
+      "type": "dart",
+      "deviceId": "edge",
+      "program": "lib/main.dart",
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "name": "LocalDrop · Maquettes hors ligne",
+      "request": "launch",
+      "type": "chrome",
+      "file": "${workspaceFolder}/apercu/index.html"
+    }
+  ]
+}
