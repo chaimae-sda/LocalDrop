@@ -41,18 +41,23 @@ class ScreenShell extends StatelessWidget {
       final mobile = ColoredBox(
         color: dark ? forest : Colors.white,
         child: SafeArea(child: Column(children: [
-          SizedBox(height: hasHeader ? 65 : 42,
+          ConstrainedBox(
+            constraints: hasHeader
+                ? const BoxConstraints(minHeight: 65)
+                : const BoxConstraints.tightFor(height: 42),
             child: Row(children: [
               if (screen != DropScreen.splash)
                 IconButton(tooltip: 'Retour', onPressed: () => _back(context),
                   icon: Icon(Icons.chevron_left_rounded, color: dark ? Colors.white : muted))
               else const SizedBox(width: 14),
-              if (hasHeader) Expanded(child: Column(mainAxisAlignment: MainAxisAlignment.center,
+              if (hasHeader) Expanded(child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 6),
+                child: Column(mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start, children: [
                   Text(screen.label, style: const TextStyle(color: Colors.white, fontSize: 18,
                     fontWeight: FontWeight.w700, letterSpacing: -.4)),
                   const Text('LocalDrop', style: TextStyle(color: Color(0xFFD5E5DB), fontSize: 11)),
-                ]))
+                ])))
               else const Spacer(),
               if (!wide)
                 IconButton(tooltip: 'Tous les écrans', onPressed: () => _openMenu(context),

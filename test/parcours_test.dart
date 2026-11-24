@@ -98,7 +98,7 @@ void main() {
     await tapVisible(tester, find.text('Nous contacter'));
     await tapVisible(tester, find.text('Envoyer ma demande'));
     expect(find.text('Renseignez ce champ.'), findsNWidgets(2));
-    await tapVisible(tester, find.text('Choisir un sujet'));
+    await tapVisible(tester, find.byType(DropdownButton<String>));
     await tapVisible(tester, find.text('Mon compte').last);
     await tester.enterText(find.byType(TextFormField).last, 'Comment modifier mes informations ?');
     await tapVisible(tester, find.text('Envoyer ma demande'));
