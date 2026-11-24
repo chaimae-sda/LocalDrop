@@ -31,3 +31,32 @@ jobs:
           name: localdrop-web
           path: build/web/
           if-no-files-found: error
+
+  mobile:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-latest
+            target: apk
+            options: --debug
+            output: build/app/outputs/flutter-apk/app-debug.apk
+          - runner: macos-15
+            target: ios
+            options: --simulator --debug
+            output: build/ios/iphonesimulator/Runner.app
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.32.8'
+          cache: true
+      - run: dart tool/prepare_mobile.dart
+      - run: flutter pub get
+      - run: flutter build ${{ matrix.target }} ${{ matrix.options }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: localdrop-${{ matrix.target }}
+          path: ${{ matrix.output }}
+          if-no-files-found: error

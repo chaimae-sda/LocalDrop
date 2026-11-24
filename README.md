@@ -15,6 +15,18 @@ Pour consulter les planches de référence immédiatement, ouvrez [l’aperçu h
 
 ## Parcourir la démo
 
+### Lancer la version mobile Flutter
+
+Depuis la racine du projet, avec le SDK Flutter installé, exécutez une fois
+`dart tool/prepare_mobile.dart`, puis `flutter pub get`. Cette commande crée
+les projets Android et iOS à partir des modèles du SDK. Les deux utilisent
+`lib/main.dart`. Branchez un téléphone Android ou démarrez un émulateur,
+puis utilisez `flutter devices` et `flutter run -d <identifiant>`.
+Pour obtenir un APK de test, utilisez `flutter build apk --debug`.
+Sur macOS avec Xcode, le même projet fonctionne sur simulateur iOS.
+La distribution en boutique nécessite vos identifiants définitifs et votre
+signature de publication. L’identifiant généré est `com.localdrop.localdrop`.
+
 - Sur ordinateur, le menu latéral donne accès aux 18 écrans. Sur mobile, utilisez le bouton **Tous les écrans** en haut à droite.
 - **Connexion** propose de remplir un compte fictif avec `camille@example.com` et `LocalDrop2026`. L’inscription client ou commerçant utilise le code de vérification **8419**.
 - Dans **Mon profil**, modifiez les coordonnées ou l’avatar, puis enregistrez. Dans **Mes adresses**, sélectionnez une adresse pour la modifier ou en ajouter une nouvelle.

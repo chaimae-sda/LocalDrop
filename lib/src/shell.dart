@@ -102,10 +102,10 @@ class _ScreenMenu extends StatelessWidget {
     Padding(padding: const EdgeInsets.fromLTRB(20, 19, 12, 17),
       child: Row(children: [
         const LogoMark(size: 36), const SizedBox(width: 10),
-        Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Text('LocalDrop', style: headingStyle.copyWith(fontSize: 23)),
           const Text('Parcours de Chaimae', style: TextStyle(fontSize: 12, color: muted)),
-        ]),
+        ])),
       ])),
     const Divider(height: 1, color: line),
     Expanded(child: ListView(padding: const EdgeInsets.fromLTRB(13, 4, 13, 16),
