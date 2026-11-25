@@ -213,3 +213,53 @@ class _HoursDialogState extends State<_HoursDialog> {
       FilledButton(onPressed: submit, child: const Text('Valider')),
     ]);
 }
+
+/// 65 · Notifications commerçant
+class ShopAlertsPage extends StatelessWidget {
+  const ShopAlertsPage({super.key});
+  @override
+  Widget build(BuildContext context) {
+    final state = AchatBoutiqueScope.of(context);
+    return PageScroll(children: [
+      const SectionTitle('Aujourd’hui'),
+      for (final order in state.recentOrders)
+        _AlertTile(Icons.check_rounded, 'Nouvelle commande #${order.number}',
+          '${order.customer} · ${euros(order.price)} · retrait ${pickupTime(order.pickup)}'),
+      const _AlertTile(Icons.bolt_rounded, 'Vitrine publiée', 'Votre offre est visible dans le quartier'),
+      const SizedBox(height: 12),
+      const SectionTitle('Mes préférences'),
+      _SwitchRow('Notifications des commandes', state.orderAlerts, state.setOrderAlerts),
+      _SwitchRow('Rappel de fin de vente', state.endOfSaleReminder, state.setEndOfSaleReminder),
+    ]);
+  }
+}
+
+class _AlertTile extends StatelessWidget {
+  const _AlertTile(this.icon, this.title, this.subtitle);
+  final IconData icon;
+  final String title, subtitle;
+  @override
+  Widget build(BuildContext context) => DecoratedBox(
+    decoration: const BoxDecoration(border: Border(bottom: BorderSide(color: line))),
+    child: Padding(padding: const EdgeInsets.symmetric(vertical: 14), child: Row(children: [
+      Container(width: 48, height: 48, decoration: BoxDecoration(color: mint, borderRadius: BorderRadius.circular(12)),
+        child: Icon(icon, color: success, size: 24)),
+      const SizedBox(width: 14),
+      Expanded(child: StackColumn(gap: 4, [
+        Text(title, style: strongStyle.copyWith(fontSize: 15)),
+        Text(subtitle, style: copyStyle.copyWith(fontSize: 13, color: const Color(0xFF4A5A51))),
+      ])),
+    ])));
+}
+
+class _SwitchRow extends StatelessWidget {
+  const _SwitchRow(this.label, this.value, this.onChanged);
+  final String label;
+  final bool value;
+  final ValueChanged<bool> onChanged;
+  @override
+  Widget build(BuildContext context) => DecoratedBox(
+    decoration: const BoxDecoration(border: Border(bottom: BorderSide(color: line))),
+    child: SwitchListTile(contentPadding: EdgeInsets.zero, value: value, onChanged: onChanged,
+      activeTrackColor: success, title: Text(label, style: strongStyle.copyWith(fontSize: 15))));
+}
