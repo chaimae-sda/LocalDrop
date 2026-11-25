@@ -214,3 +214,43 @@ class OrderConfirmedPage extends StatelessWidget {
       ]);
   }
 }
+
+/// 26 · Mon pass de retrait
+class PickupPassPage extends StatelessWidget {
+  const PickupPassPage({super.key});
+  @override
+  Widget build(BuildContext context) {
+    final state = AchatBoutiqueScope.of(context);
+    final offer = state.offer;
+    final digits = state.pickupCode.split('');
+    return PageScroll(children: [
+      Text(offer.shop, textAlign: TextAlign.center, style: strongStyle.copyWith(fontSize: 19)),
+      const SizedBox(height: 6),
+      Text(offer.address, textAlign: TextAlign.center, style: copyStyle.copyWith(fontSize: 13)),
+      const SizedBox(height: 16),
+      DashedFrame(color: const Color(0xFFC3CEC7), fill: Colors.white,
+        child: LayoutBuilder(builder: (context, box) => Column(children: [
+          Text('Présentez ce QR code au commerçant', textAlign: TextAlign.center,
+            style: copyStyle.copyWith(color: const Color(0xFF34443B))),
+          const SizedBox(height: 16),
+          PickupQr('LD-${state.orderNumber}-${state.pickupCode}', size: math.min(200, box.maxWidth - 20)),
+          const SizedBox(height: 16),
+          Text('Code de secours', style: copyStyle.copyWith(color: const Color(0xFF34443B))),
+          const SizedBox(height: 4),
+          Semantics(label: 'Code de secours ${digits.join(' ')}', excludeSemantics: true,
+            child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+              for (final digit in digits) Padding(padding: const EdgeInsets.symmetric(horizontal: 14),
+                child: Text(digit, style: headingStyle.copyWith(fontSize: 30, color: forest, letterSpacing: 0))),
+            ])),
+        ]))),
+      const SizedBox(height: 16),
+      InfoBanner('À retirer avant ${pickupTime(offer.pickupUntil)}', warm: true),
+      const SizedBox(height: 12),
+      DropButton('Itinéraire vers le commerce', icon: Icons.map_outlined, style: ActionStyle.outline,
+        onPressed: () => goAya(context, AyaScreen.directions)),
+      const SizedBox(height: 10),
+      ForestButton('Voir ma commande', icon: Icons.receipt_long_outlined,
+        onPressed: () => openTeamLink(context, TeamLink.orderDetail)),
+    ]);
+  }
+}
