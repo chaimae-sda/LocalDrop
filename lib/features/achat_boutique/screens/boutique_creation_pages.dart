@@ -414,3 +414,28 @@ class ShowcasePreviewPage extends StatelessWidget {
     ]);
   }
 }
+
+/// 49 · Vitrine publiée
+class ShowcasePublishedPage extends StatelessWidget {
+  const ShowcasePublishedPage({super.key});
+  @override
+  Widget build(BuildContext context) {
+    final state = AchatBoutiqueScope.of(context);
+    final live = state.live;
+    final left = live.quantity - state.sold;
+    return SuccessLayout(icon: Icons.bolt_rounded, title: 'Votre vitrine est en ligne !',
+      subtitle: 'Les habitants à proximité sont informés de vos paniers du jour.', children: [
+        SurfaceCard(child: StackColumn(gap: 4, [
+          ValueRow(live.title, '', valueWidget: const StatusPill('PUBLIÉE', solid: true)),
+          ValueRow('Disponibles', '$left panier${left > 1 ? 's' : ''}'),
+          ValueRow('Fin de vente', pickupTime(live.pickupUntil)),
+        ])),
+        const SizedBox(height: 18),
+        DropButton('Suivre les ventes en direct', icon: Icons.show_chart_rounded,
+          onPressed: () => openTeamLink(context, TeamLink.activeShowcase)),
+        const SizedBox(height: 10),
+        DropButton('Retour au tableau de bord', style: ActionStyle.outline,
+          onPressed: () => jumpAya(context, AyaScreen.dashboard)),
+      ]);
+  }
+}
