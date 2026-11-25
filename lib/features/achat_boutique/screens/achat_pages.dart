@@ -43,3 +43,50 @@ class CartPage extends StatelessWidget {
     ]);
   }
 }
+
+/// 23 · Récapitulatif
+class CheckoutPage extends StatelessWidget {
+  const CheckoutPage({super.key});
+  @override
+  Widget build(BuildContext context) {
+    final state = AchatBoutiqueScope.of(context);
+    final offer = state.offer;
+    return PageScroll(children: [
+      const SectionTitle('Votre panier'),
+      SurfaceCard(child: StackColumn(gap: 4, [
+        Text(offer.title, style: strongStyle.copyWith(fontSize: 18)),
+        Row(children: [
+          const Icon(Icons.storefront_outlined, size: 17, color: muted),
+          const SizedBox(width: 6),
+          Expanded(child: Text(offer.shop, style: copyStyle)),
+        ]),
+        const Divider(height: 22, color: line),
+        ValueRow('Prix du panier', euros(offer.price), size: 15),
+        ValueRow('Frais de service', euros(state.serviceFee), size: 15),
+        const Divider(height: 22, color: line),
+        ValueRow('Total', euros(state.total), strong: true, valueColor: orangeText),
+      ])),
+      const SizedBox(height: 10),
+      const SectionTitle('Retrait du panier'),
+      SurfaceCard(child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        const Icon(Icons.calendar_today_outlined, size: 20, color: ink),
+        const SizedBox(width: 10),
+        Expanded(child: StackColumn(gap: 4, [
+          Text('Aujourd’hui, ${pickupTime(offer.pickupFrom)} – ${pickupTime(offer.pickupUntil)}',
+            style: strongStyle.copyWith(fontWeight: FontWeight.w600)),
+          Text(offer.address, style: copyStyle.copyWith(fontSize: 13)),
+        ])),
+        const SizedBox(width: 8),
+        const StatusPill('Confirmé'),
+      ])),
+      const SizedBox(height: 10),
+      const SectionTitle('Paiement'),
+      AccountRow(Icons.credit_card_rounded, 'Carte bancaire',
+        '${state.card.brand} se terminant par ${state.card.last4}',
+        () => goAya(context, AyaScreen.payment)),
+      const SizedBox(height: 16),
+      DropButton('Confirmer et payer · ${euros(state.total)}', icon: Icons.lock_outline_rounded,
+        onPressed: () => jumpAya(context, AyaScreen.orderConfirmed)),
+    ]);
+  }
+}
