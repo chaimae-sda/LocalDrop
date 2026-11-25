@@ -367,3 +367,50 @@ class ShowcasePhotoPage extends StatelessWidget {
     ]);
   }
 }
+
+/// 48 · Aperçu de ma vitrine
+class ShowcasePreviewPage extends StatelessWidget {
+  const ShowcasePreviewPage({super.key});
+  @override
+  Widget build(BuildContext context) {
+    final state = AchatBoutiqueScope.of(context);
+    final draft = state.draft;
+    return PageScroll(children: [
+      const SectionTitle('Ce que verront les clients'),
+      PhotoPlaceholder(height: 210, discount: draft.discount),
+      const SizedBox(height: 14),
+      Text(draft.title, style: headingStyle.copyWith(fontSize: 25)),
+      const SizedBox(height: 8),
+      Row(children: [
+        const Icon(Icons.storefront_outlined, size: 19, color: forest),
+        const SizedBox(width: 6),
+        Flexible(child: Text(state.shop.name, overflow: TextOverflow.ellipsis,
+          style: const TextStyle(color: forest, fontWeight: FontWeight.w800, fontSize: 14))),
+        const Text('  ·  200 m', style: TextStyle(color: muted, fontSize: 13)),
+      ]),
+      const SizedBox(height: 14),
+      Container(
+        padding: const EdgeInsets.fromLTRB(18, 14, 18, 14),
+        decoration: BoxDecoration(color: mint, borderRadius: BorderRadius.circular(18)),
+        child: StackColumn(gap: 2, [
+          ValueRow('Valeur initiale', '', size: 15, valueWidget: Text(euros(draft.initialValue),
+            style: const TextStyle(color: muted, decoration: TextDecoration.lineThrough))),
+          ValueRow('Prix Flash', '', size: 15, valueWidget: Text(euros(draft.price),
+            style: headingStyle.copyWith(color: orangeText, fontSize: 28, letterSpacing: -.4))),
+          ValueRow('Quantité', '${draft.quantity} panier${draft.quantity > 1 ? 's' : ''}', size: 15),
+          ValueRow('Retrait avant', pickupTime(draft.pickupUntil), size: 15),
+        ]),
+      ),
+      const SizedBox(height: 14),
+      DropButton('Publier la Vitrine Flash', icon: Icons.bolt_outlined, onPressed: () {
+        state.publish();
+        goAfter(context, AyaScreen.showcasePublished, AyaScreen.dashboard);
+      }),
+      const SizedBox(height: 10),
+      DropButton('Modifier les informations', icon: Icons.edit_outlined, style: ActionStyle.outline,
+        onPressed: () => Navigator.of(context).canPop()
+            ? Navigator.of(context).pop()
+            : goAya(context, AyaScreen.newShowcase, replace: true)),
+    ]);
+  }
+}
