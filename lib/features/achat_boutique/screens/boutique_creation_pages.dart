@@ -123,3 +123,26 @@ class _CreateShopPageState extends State<CreateShopPage> {
     ])),
   ]);
 }
+
+/// 44 · Boutique prête
+class ShopReadyPage extends StatelessWidget {
+  const ShopReadyPage({super.key});
+  @override
+  Widget build(BuildContext context) {
+    final state = AchatBoutiqueScope.of(context);
+    return SuccessLayout(icon: Icons.storefront_outlined, title: 'Votre boutique est prête !',
+      subtitle: 'Félicitations ! Vous pouvez publier votre première Vitrine Flash.', children: [
+        SurfaceCard(child: StackColumn(gap: 4, [
+          ValueRow('Boutique', state.shop.name, valueColor: ink),
+          ValueRow('Abonnement', '', valueWidget: StatusPill(state.plan.short)),
+          const ValueRow('Commission', '0 %', valueColor: ink),
+        ])),
+        const SizedBox(height: 18),
+        DropButton('Créer ma première vitrine', icon: Icons.bolt_outlined,
+          onPressed: () => goAya(context, AyaScreen.newShowcase)),
+        const SizedBox(height: 10),
+        DropButton('Voir mon tableau de bord', style: ActionStyle.outline,
+          onPressed: () => jumpAya(context, AyaScreen.dashboard)),
+      ]);
+  }
+}
