@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../models/client_models.dart';
 
 class ClientExperienceController extends ChangeNotifier {
   final Set<String> favorites = {'bio'};
@@ -54,6 +53,11 @@ class ClientExperienceController extends ChangeNotifier {
     notifyListeners();
   }
 
+  void widenSearchRadius(double distance) {
+    maxDistance = distance;
+    notifyListeners();
+  }
+
   void updateAlerts({
     required bool notifications,
     required bool proximity,
@@ -66,13 +70,15 @@ class ClientExperienceController extends ChangeNotifier {
   }
 }
 
-class ClientExperienceScope extends InheritedNotifier<ClientExperienceController> {
+class ClientExperienceScope
+    extends InheritedNotifier<ClientExperienceController> {
   const ClientExperienceScope({
     super.key,
     required ClientExperienceController controller,
     required super.child,
   }) : super(notifier: controller);
 
-  static ClientExperienceController of(BuildContext context) =>
-      context.dependOnInheritedWidgetOfExactType<ClientExperienceScope>()!.notifier!;
+  static ClientExperienceController of(BuildContext context) => context
+      .dependOnInheritedWidgetOfExactType<ClientExperienceScope>()!
+      .notifier!;
 }

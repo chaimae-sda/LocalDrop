@@ -4,7 +4,11 @@ import 'package:localdrop/main.dart';
 import 'package:localdrop/src/screens.dart';
 import 'package:localdrop/src/shell.dart';
 
-Future<void> openPage(WidgetTester tester, DropScreen screen, {Size size = const Size(390, 844)}) async {
+Future<void> openPage(
+  WidgetTester tester,
+  DropScreen screen, {
+  Size size = const Size(390, 844),
+}) async {
   tester.view.devicePixelRatio = 1;
   tester.view.physicalSize = size;
   addTearDown(tester.view.resetPhysicalSize);
@@ -21,29 +25,60 @@ Future<void> tapVisible(WidgetTester tester, Finder finder) async {
 
 void main() {
   test('Les liens directs Chaimae conservent les numéros des maquettes', () {
-    expect(DropScreen.values.map((s) => s.number),
-      containsAll(['00','01','02','03','04','05','06','07','08','09','10','11','12','32','33','34','37','38']));
+    expect(
+      DropScreen.values.map((s) => s.number),
+      containsAll([
+        '00',
+        '01',
+        '02',
+        '03',
+        '04',
+        '05',
+        '06',
+        '07',
+        '08',
+        '09',
+        '10',
+        '11',
+        '12',
+        '32',
+        '33',
+        '34',
+        '37',
+        '38',
+      ]),
+    );
     for (final screen in DropScreen.values) {
       expect(DropScreen.fromRoute(screen.route), screen);
     }
   });
 
-  testWidgets('Toutes les pages s’ouvrent sur mobile et ordinateur', (tester) async {
+  testWidgets('Toutes les pages s’ouvrent sur mobile et ordinateur', (
+    tester,
+  ) async {
     for (final size in [const Size(320, 640), const Size(1280, 800)]) {
       for (final screen in DropScreen.values) {
         await openPage(tester, screen, size: size);
-        expect(tester.widget<ScreenShell>(find.byType(ScreenShell)).screen, screen);
+        expect(
+          tester.widget<ScreenShell>(find.byType(ScreenShell)).screen,
+          screen,
+        );
         expect(tester.takeException(), isNull, reason: screen.id);
       }
     }
     await tester.pumpWidget(const SizedBox.shrink());
   });
 
-  testWidgets('Connexion de démonstration et modification du profil', (tester) async {
+  testWidgets('Connexion de démonstration et modification du profil', (
+    tester,
+  ) async {
     await openPage(tester, DropScreen.login);
     await tapVisible(tester, find.text('Se connecter'));
     expect(find.text('Saisissez une adresse e-mail valide.'), findsOneWidget);
-    await tapVisible(tester, find.text('Remplir avec le compte de démonstration'));
+    await tapVisible(
+      tester,
+      find.text('Remplir avec le compte de démonstration'),
+    );
     await tapVisible(tester, find.text('Se connecter'));
     expect(find.text('Camille Martin'), findsOneWidget);
     await tapVisible(tester, find.text('Mes informations'));
@@ -52,30 +87,49 @@ void main() {
     expect(find.text('Chaimae Test'), findsOneWidget);
   });
 
-  testWidgets('Les inscriptions client et commerçant mènent à la vérification', (tester) async {
-    for (final merchant in [false, true]) {
-      await openPage(tester, DropScreen.roles);
-      await tapVisible(tester, find.byKey(ValueKey(merchant ? 'choose-merchant' : 'choose-client')));
-      final fields = find.byType(TextFormField);
-      final values = ['Chaimae Test', if (merchant) 'Épicerie du coin',
-        'chaimae@example.com', '0612345678', 'Panier2026'];
-      for (var i = 0; i < values.length; i++) {
-        await tester.ensureVisible(fields.at(i));
-        await tester.enterText(fields.at(i), values[i]);
+  testWidgets(
+    'Les inscriptions client et commerçant mènent à la vérification',
+    (tester) async {
+      for (final merchant in [false, true]) {
+        await openPage(tester, DropScreen.roles);
+        await tapVisible(
+          tester,
+          find.byKey(ValueKey(merchant ? 'choose-merchant' : 'choose-client')),
+        );
+        final fields = find.byType(TextFormField);
+        final values = [
+          'Chaimae Test',
+          if (merchant) 'Épicerie du coin',
+          'chaimae@example.com',
+          '0612345678',
+          'Panier2026',
+        ];
+        for (var i = 0; i < values.length; i++) {
+          await tester.ensureVisible(fields.at(i));
+          await tester.enterText(fields.at(i), values[i]);
+        }
+        await tapVisible(tester, find.byType(CheckboxListTile));
+        await tapVisible(tester, find.text('Créer mon compte'));
+        await tester.enterText(find.byKey(const ValueKey('otp')), '0000');
+        await tapVisible(tester, find.text('Valider mon code'));
+        expect(
+          find.text('Saisissez le code de démonstration 8419.'),
+          findsOneWidget,
+        );
+        await tester.enterText(find.byKey(const ValueKey('otp')), '8419');
+        await tapVisible(tester, find.text('Valider mon code'));
+        await tapVisible(tester, find.text('Plus tard'));
+        await tapVisible(tester, find.text('Activer les notifications'));
+        expect(find.text('Bienvenue dans le quartier.'), findsOneWidget);
+        expect(
+          find.text(
+            merchant ? 'Ouvrir mon espace commerçant' : 'Explorer les offres',
+          ),
+          findsOneWidget,
+        );
       }
-      await tapVisible(tester, find.byType(CheckboxListTile));
-      await tapVisible(tester, find.text('Créer mon compte'));
-      await tester.enterText(find.byKey(const ValueKey('otp')), '0000');
-      await tapVisible(tester, find.text('Valider mon code'));
-      expect(find.text('Saisissez le code de démonstration 8419.'), findsOneWidget);
-      await tester.enterText(find.byKey(const ValueKey('otp')), '8419');
-      await tapVisible(tester, find.text('Valider mon code'));
-      await tapVisible(tester, find.text('Plus tard'));
-      await tapVisible(tester, find.text('Activer les notifications'));
-      expect(find.text('Bienvenue dans le quartier.'), findsOneWidget);
-      expect(find.text(merchant ? 'Ouvrir mon espace commerçant' : 'Explorer les offres'), findsOneWidget);
-    }
-  });
+    },
+  );
 
   testWidgets('Nouvelle adresse et adresse par défaut', (tester) async {
     await openPage(tester, DropScreen.addresses);
@@ -90,7 +144,9 @@ void main() {
     expect(find.text('Par défaut'), findsOneWidget);
   });
 
-  testWidgets('FAQ, formulaire de contact et confirmation locale', (tester) async {
+  testWidgets('FAQ, formulaire de contact et confirmation locale', (
+    tester,
+  ) async {
     await openPage(tester, DropScreen.help);
     await tapVisible(tester, find.text('Comment récupérer mon panier ?'));
     expect(find.textContaining('ouvrez le pass de retrait'), findsOneWidget);
@@ -99,19 +155,42 @@ void main() {
     expect(find.text('Renseignez ce champ.'), findsNWidgets(2));
     await tapVisible(tester, find.byType(DropdownButton<String>));
     await tapVisible(tester, find.text('Mon compte').last);
-    await tester.enterText(find.byType(TextFormField).last, 'Comment modifier mes informations ?');
+    await tester.enterText(
+      find.byType(TextFormField).last,
+      'Comment modifier mes informations ?',
+    );
     await tapVisible(tester, find.text('Envoyer ma demande'));
     expect(find.text('Demande simulée'), findsOneWidget);
   });
 
   test('Les 18 écrans Layla sont présents dans les routes', () {
     const layla = [
-      '13','14','15','16','17','18','19','20','21',
-      '28','29','30','31','35','36','39','40','41',
+      '13',
+      '14',
+      '15',
+      '16',
+      '17',
+      '18',
+      '19',
+      '20',
+      '21',
+      '28',
+      '29',
+      '30',
+      '31',
+      '35',
+      '36',
+      '39',
+      '40',
+      '41',
     ];
-    expect(layla.map((number) =>
-      DropScreen.values.where((screen) => screen.number == number).length),
-      everyElement(1));
+    expect(
+      layla.map(
+        (number) =>
+            DropScreen.values.where((screen) => screen.number == number).length,
+      ),
+      everyElement(1),
+    );
   });
 
   testWidgets('Les écrans Layla principaux s’ouvrent', (tester) async {

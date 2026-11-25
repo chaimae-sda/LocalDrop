@@ -40,9 +40,13 @@ class _LocalDropAppState extends State<LocalDropApp> {
     final screen = DropScreen.fromRoute(settings.name) ?? DropScreen.splash;
     final page = switch (screen) {
       DropScreen.splash => const SplashPage(),
-      DropScreen.onboarding || DropScreen.nearby || DropScreen.pickup => OnboardingPage(screen),
+      DropScreen.onboarding ||
+      DropScreen.nearby ||
+      DropScreen.pickup => OnboardingPage(screen),
       DropScreen.roles => const RolePage(),
-      DropScreen.login || DropScreen.signupClient || DropScreen.signupMerchant => AuthPage(screen),
+      DropScreen.login ||
+      DropScreen.signupClient ||
+      DropScreen.signupMerchant => AuthPage(screen),
       DropScreen.verify => const VerificationPage(),
       DropScreen.reset => const ResetPage(),
       DropScreen.location => const PermissionPage(position: true),
@@ -77,7 +81,8 @@ class _LocalDropAppState extends State<LocalDropApp> {
       pageBuilder: (_, __, ___) => ScreenShell(screen: screen, child: page),
       transitionDuration: const Duration(milliseconds: 150),
       reverseTransitionDuration: const Duration(milliseconds: 120),
-      transitionsBuilder: (_, animation, __, child) => FadeTransition(opacity: animation, child: child),
+      transitionsBuilder: (_, animation, __, child) =>
+          FadeTransition(opacity: animation, child: child),
     );
   }
 

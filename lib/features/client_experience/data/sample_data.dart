@@ -13,7 +13,8 @@ const offers = <FlashOffer>[
     discount: 62,
     distance: 0.4,
     available: 5,
-    description: 'Pain de campagne, viennoiseries et douceurs du jour préparés dans notre boulangerie.',
+    description:
+        'Pain de campagne, viennoiseries et douceurs du jour préparés dans notre boulangerie.',
   ),
   FlashOffer(
     id: 'bio',
@@ -27,7 +28,8 @@ const offers = <FlashOffer>[
     discount: 65,
     distance: 0.8,
     available: 3,
-    description: 'Un assortiment de fruits et légumes de saison, sélectionnés le matin même.',
+    description:
+        'Un assortiment de fruits et légumes de saison, sélectionnés le matin même.',
   ),
   FlashOffer(
     id: 'epicerie',
@@ -41,7 +43,8 @@ const offers = <FlashOffer>[
     discount: 64,
     distance: 1.2,
     available: 8,
-    description: 'Biscuits artisanaux, confitures et boissons fraîches dans une box surprise.',
+    description:
+        'Biscuits artisanaux, confitures et boissons fraîches dans une box surprise.',
   ),
   FlashOffer(
     id: 'restaurant',
@@ -55,7 +58,8 @@ const offers = <FlashOffer>[
     discount: 53,
     distance: 1.6,
     available: 4,
-    description: 'Une entrée et un plat du jour proposés par notre cuisine locale.',
+    description:
+        'Une entrée et un plat du jour proposés par notre cuisine locale.',
   ),
 ];
 
@@ -66,7 +70,8 @@ const shops = <LocalShop>[
     address: '18 rue du Pont, Paris',
     hours: 'Lundi - samedi : 7h - 20h',
     distance: 0.4,
-    description: 'Une boulangerie de quartier qui fabrique ses pains et viennoiseries chaque matin.',
+    description:
+        'Une boulangerie de quartier qui fabrique ses pains et viennoiseries chaque matin.',
   ),
   LocalShop(
     name: 'Marché Bio Central',
@@ -74,7 +79,8 @@ const shops = <LocalShop>[
     address: '4 place du Marché, Paris',
     hours: 'Tous les jours : 8h - 19h',
     distance: 0.8,
-    description: 'Des fruits et légumes frais issus de producteurs partenaires locaux.',
+    description:
+        'Des fruits et légumes frais issus de producteurs partenaires locaux.',
   ),
   LocalShop(
     name: 'Épicerie Les Délices',
@@ -82,7 +88,8 @@ const shops = <LocalShop>[
     address: '31 avenue des Lilas, Paris',
     hours: 'Du mardi au dimanche : 9h - 20h',
     distance: 1.2,
-    description: 'Épicerie conviviale proposant des produits locaux et gourmands.',
+    description:
+        'Épicerie conviviale proposant des produits locaux et gourmands.',
   ),
 ];
 
