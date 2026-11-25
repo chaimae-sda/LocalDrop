@@ -46,3 +46,62 @@ class ShopProfilePage extends StatelessWidget {
     ]);
   }
 }
+
+/// 63 · Modifier la boutique
+class EditShopPage extends StatefulWidget {
+  const EditShopPage({super.key});
+  @override
+  State<EditShopPage> createState() => _EditShopPageState();
+}
+
+class _EditShopPageState extends State<EditShopPage> {
+  final form = GlobalKey<FormState>();
+  final name = TextEditingController();
+  final category = TextEditingController();
+  final address = TextEditingController();
+  final phone = TextEditingController();
+  var initialized = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (initialized) return;
+    initialized = true;
+    final shop = AchatBoutiqueScope.of(context).shop;
+    name.text = shop.name;
+    category.text = shop.category;
+    address.text = shop.address;
+    phone.text = shop.phone;
+  }
+
+  @override
+  void dispose() {
+    name.dispose(); category.dispose(); address.dispose(); phone.dispose();
+    super.dispose();
+  }
+
+  void save() {
+    if (!form.currentState!.validate()) return;
+    AchatBoutiqueScope.of(context).saveShop(ShopInfo(name: name.text.trim(), category: category.text.trim(),
+      address: address.text.trim(), phone: phone.text.trim()));
+    final nav = Navigator.of(context);
+    nav.canPop() ? nav.pop() : goAya(context, AyaScreen.shopProfile, replace: true);
+  }
+
+  @override
+  Widget build(BuildContext context) => PageScroll(children: [
+    const Center(child: ShopLogo(size: 76)),
+    TextButton.icon(onPressed: () => feedback(context, 'Choix du logo simulé.'),
+      style: TextButton.styleFrom(foregroundColor: success),
+      icon: const Icon(Icons.photo_camera_outlined, size: 17), label: const Text('Changer le logo')),
+    const SizedBox(height: 6),
+    Form(key: form, child: StackColumn(gap: 14, [
+      DropField('Nom du commerce', controller: name, icon: Icons.storefront_outlined, validate: requiredText),
+      DropField('Catégorie', controller: category, icon: Icons.storefront_outlined, validate: requiredText),
+      DropField('Adresse', controller: address, icon: Icons.location_on_outlined, validate: requiredText),
+      DropField('Numéro de téléphone', controller: phone, icon: Icons.phone_android_rounded,
+        keyboard: TextInputType.phone, validate: validPhone, action: TextInputAction.done),
+      DropButton('Enregistrer', icon: Icons.check_rounded, onPressed: save),
+    ])),
+  ]);
+}
