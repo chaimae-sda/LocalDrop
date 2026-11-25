@@ -324,3 +324,46 @@ class _NewShowcasePageState extends State<NewShowcasePage> {
     ]);
   }
 }
+
+/// 47 · Photo du panier (la prise de vue est simulée)
+class ShowcasePhotoPage extends StatelessWidget {
+  const ShowcasePhotoPage({super.key});
+
+  void choose(BuildContext context, AchatBoutiqueController state, PhotoSource source) {
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    state.choosePhoto(source);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final state = AchatBoutiqueScope.of(context);
+    final photo = state.draft.photo;
+    return PageScroll(children: [
+      DashedFrame(padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 34), child: Column(children: [
+        const CameraBubble(size: 72),
+        const SizedBox(height: 14),
+        Text('Photo du panier', style: strongStyle.copyWith(color: forest, fontSize: 17)),
+        const SizedBox(height: 4),
+        Text(photo == null ? 'Prenez une photo nette des produits du jour.' : 'Photo sélectionnée.',
+          textAlign: TextAlign.center, style: copyStyle.copyWith(fontSize: 13)),
+        const SizedBox(height: 16),
+        CompactButton('Ouvrir la caméra', onPressed: () => choose(context, state, PhotoSource.camera)),
+        const SizedBox(height: 10),
+        CompactButton('Choisir depuis la galerie', outline: true,
+          onPressed: () => choose(context, state, PhotoSource.gallery)),
+      ])),
+      const SizedBox(height: 16),
+      const InfoBanner('Formats JPG ou PNG · max 10 Mo'),
+      const SizedBox(height: 14),
+      DropButton('Utiliser cette photo', icon: Icons.check_rounded, onPressed: () {
+        if (photo == null) {
+          feedback(context, 'Prenez ou choisissez d’abord une photo.');
+        } else if (Navigator.of(context).canPop()) {
+          Navigator.of(context).pop();
+        } else {
+          goAya(context, AyaScreen.newShowcase, replace: true);
+        }
+      }),
+    ]);
+  }
+}
