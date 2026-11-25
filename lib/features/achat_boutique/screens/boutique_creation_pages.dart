@@ -74,3 +74,52 @@ class _PlanCard extends StatelessWidget {
     ]);
   }
 }
+
+/// 43 · Créer ma boutique
+class CreateShopPage extends StatefulWidget {
+  const CreateShopPage({super.key});
+  @override
+  State<CreateShopPage> createState() => _CreateShopPageState();
+}
+
+class _CreateShopPageState extends State<CreateShopPage> {
+  final form = GlobalKey<FormState>();
+  final name = TextEditingController();
+  final category = TextEditingController();
+  final address = TextEditingController();
+  final phone = TextEditingController();
+
+  @override
+  void dispose() {
+    name.dispose(); category.dispose(); address.dispose(); phone.dispose();
+    super.dispose();
+  }
+
+  void submit() {
+    if (!form.currentState!.validate()) return;
+    AchatBoutiqueScope.of(context).saveShop(ShopInfo(name: name.text.trim(), category: category.text.trim(),
+      address: address.text.trim(), phone: phone.text.trim()));
+    goAya(context, AyaScreen.shopReady);
+  }
+
+  @override
+  Widget build(BuildContext context) => PageScroll(padding: const EdgeInsets.fromLTRB(20, 14, 20, 26), children: [
+    const Kicker('Étape 1 sur 2'),
+    const SizedBox(height: 12),
+    const ProgressLine(.5, label: 'Création de la boutique'),
+    const SizedBox(height: 14),
+    const Text('Parlez-nous de votre commerce pour créer votre vitrine.', style: copyStyle),
+    const SizedBox(height: 14),
+    Form(key: form, child: StackColumn(gap: 14, [
+      DropField('Nom de la boutique', controller: name, hint: 'Boulangerie de la Place',
+        icon: Icons.storefront_outlined, validate: requiredText),
+      DropField('Catégorie', controller: category, hint: 'Boulangerie & pâtisserie',
+        icon: Icons.storefront_outlined, validate: requiredText),
+      DropField('Adresse', controller: address, hint: '12, Rue du Commerce, 75001 Paris',
+        icon: Icons.location_on_outlined, validate: requiredText),
+      DropField('Téléphone', controller: phone, hint: '06 00 00 00 00', icon: Icons.phone_android_rounded,
+        keyboard: TextInputType.phone, validate: validPhone, action: TextInputAction.done),
+      DropButton('Créer ma boutique', icon: Icons.check_rounded, onPressed: submit),
+    ])),
+  ]);
+}
