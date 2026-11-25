@@ -223,3 +223,104 @@ class _StatTile extends StatelessWidget {
       ]),
     ));
 }
+
+/// 46 · Nouvelle Vitrine Flash
+class NewShowcasePage extends StatefulWidget {
+  const NewShowcasePage({super.key});
+  @override
+  State<NewShowcasePage> createState() => _NewShowcasePageState();
+}
+
+class _NewShowcasePageState extends State<NewShowcasePage> {
+  final form = GlobalKey<FormState>();
+  final title = TextEditingController();
+  final initial = TextEditingController();
+  final price = TextEditingController();
+  late int quantity;
+  late TimeOfDay pickup;
+  var initialized = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (initialized) return;
+    initialized = true;
+    final draft = AchatBoutiqueScope.of(context).draft;
+    title.text = draft.title;
+    initial.text = euros(draft.initialValue);
+    price.text = euros(draft.price);
+    quantity = draft.quantity;
+    pickup = draft.pickupUntil;
+  }
+
+  @override
+  void dispose() {
+    title.dispose(); initial.dispose(); price.dispose();
+    super.dispose();
+  }
+
+  String? validInitial(String? value) =>
+      (parseEuros(value) ?? 0) <= 0 ? 'Saisissez un montant.' : null;
+
+  String? validPrice(String? value) {
+    final flash = parseEuros(value);
+    if (flash == null || flash <= 0) return 'Saisissez un montant.';
+    final base = parseEuros(initial.text);
+    if (base != null && flash >= base) return 'Inférieur à la valeur initiale.';
+    return null;
+  }
+
+  /// Garde la saisie dans le brouillon pendant le passage par l’écran photo.
+  void saveDraft(AchatBoutiqueController state) => state.updateDraft(state.draft.copyWith(
+    title: title.text.trim().isEmpty ? null : title.text.trim(),
+    initialValue: parseEuros(initial.text), price: parseEuros(price.text),
+    quantity: quantity, pickupUntil: pickup));
+
+  @override
+  Widget build(BuildContext context) {
+    final state = AchatBoutiqueScope.of(context);
+    final photo = state.draft.photo;
+    const amount = TextInputType.numberWithOptions(decimal: true);
+    return PageScroll(children: [
+      DashedFrame(child: Column(children: [
+        const CameraBubble(),
+        const SizedBox(height: 12),
+        Text(photo == null ? 'Prendre une photo' : 'Photo ajoutée',
+          style: strongStyle.copyWith(color: forest, fontSize: 17)),
+        const SizedBox(height: 4),
+        Text('Hébergée sur le bucket AWS S3', textAlign: TextAlign.center, style: copyStyle.copyWith(fontSize: 12)),
+        TextButton(
+          onPressed: () {
+            saveDraft(state);
+            goAya(context, AyaScreen.showcasePhoto);
+          },
+          style: TextButton.styleFrom(foregroundColor: orangeText),
+          child: const Text('Importer / photographier', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800))),
+      ])),
+      const SizedBox(height: 16),
+      Form(key: form, child: StackColumn(gap: 16, [
+        DropField('Titre du panier', controller: title, validate: requiredText),
+        Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Expanded(child: DropField('Valeur initiale', controller: initial, keyboard: amount, validate: validInitial)),
+          const SizedBox(width: 12),
+          Expanded(child: DropField('Prix flash', controller: price, keyboard: amount, validate: validPrice)),
+        ]),
+        Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Expanded(child: StackColumn(gap: 6, [
+            const FieldLabel('Quantité'),
+            QuantityStepper(value: quantity, onChanged: (value) => setState(() => quantity = value)),
+          ])),
+          const SizedBox(width: 12),
+          Expanded(child: TimeField('Retrait avant', value: pickup,
+            onChanged: (value) => setState(() => pickup = value))),
+        ]),
+        const InfoBanner('Les riverains proches recevront une alerte'),
+        DropButton('Prévisualiser la vitrine', icon: Icons.chevron_right_rounded, onPressed: () {
+          if (!form.currentState!.validate()) return;
+          saveDraft(state);
+          goAya(context, AyaScreen.showcasePreview);
+        }),
+      ])),
+    ]);
+  }
+}
