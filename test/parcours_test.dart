@@ -20,10 +20,9 @@ Future<void> tapVisible(WidgetTester tester, Finder finder) async {
 }
 
 void main() {
-  test('Les 18 liens directs conservent les numéros des maquettes', () {
-    expect(DropScreen.values.length, 18);
+  test('Les liens directs Chaimae conservent les numéros des maquettes', () {
     expect(DropScreen.values.map((s) => s.number),
-      ['00','01','02','03','04','05','06','07','08','09','10','11','12','32','33','34','37','38']);
+      containsAll(['00','01','02','03','04','05','06','07','08','09','10','11','12','32','33','34','37','38']));
     for (final screen in DropScreen.values) {
       expect(DropScreen.fromRoute(screen.route), screen);
     }
@@ -103,5 +102,41 @@ void main() {
     await tester.enterText(find.byType(TextFormField).last, 'Comment modifier mes informations ?');
     await tapVisible(tester, find.text('Envoyer ma demande'));
     expect(find.text('Demande simulée'), findsOneWidget);
+  });
+
+  test('Les 18 écrans Layla sont présents dans les routes', () {
+    const layla = [
+      '13','14','15','16','17','18','19','20','21',
+      '28','29','30','31','35','36','39','40','41',
+    ];
+    expect(layla.map((number) =>
+      DropScreen.values.where((screen) => screen.number == number).length),
+      everyElement(1));
+  });
+
+  testWidgets('Les écrans Layla principaux s’ouvrent', (tester) async {
+    for (final screen in [
+      DropScreen.aroundMe,
+      DropScreen.flashOffers,
+      DropScreen.search,
+      DropScreen.filters,
+      DropScreen.categories,
+      DropScreen.offerDetail,
+      DropScreen.shopDetail,
+      DropScreen.favorites,
+      DropScreen.notifications,
+      DropScreen.orders,
+      DropScreen.orderDetail,
+      DropScreen.purchaseHistory,
+      DropScreen.review,
+      DropScreen.preferences,
+      DropScreen.proximityAlerts,
+      DropScreen.noOffers,
+      DropScreen.noOrders,
+      DropScreen.settings,
+    ]) {
+      await openPage(tester, screen);
+      expect(tester.takeException(), isNull, reason: screen.id);
+    }
   });
 }

@@ -16,14 +16,32 @@ enum DropScreen {
   editProfile('33_client_modifier_profil', 'Modifier mon profil'),
   addresses('34_client_adresses', 'Mes adresses'),
   help('37_client_aide', 'Centre d’aide'),
-  contact('38_client_contact', 'Contacter le support');
+  contact('38_client_contact', 'Contacter le support'),
+  aroundMe('13_client_autour_moi', 'Autour de moi'),
+  flashOffers('14_client_ventes_flash', 'Ventes Flash'),
+  search('15_client_recherche', 'Recherche'),
+  filters('16_client_filtres', 'Filtres'),
+  categories('17_client_categories', 'Catégories'),
+  offerDetail('18_client_fiche_offre', 'Fiche de l’offre'),
+  shopDetail('19_client_fiche_commerce', 'Fiche commerce'),
+  favorites('20_client_favoris', 'Favoris'),
+  notifications('21_client_notifications', 'Notifications'),
+  orders('28_client_commandes', 'Mes commandes'),
+  orderDetail('29_client_detail_commande', 'Détail de commande'),
+  purchaseHistory('30_client_historique', 'Historique des achats'),
+  review('31_client_donner_avis', 'Donner mon avis'),
+  preferences('35_client_preferences', 'Mes préférences'),
+  proximityAlerts('36_client_reglages_alertes', 'Alertes de proximité'),
+  noOffers('39_client_aucune_offre', 'Aucune offre'),
+  noOrders('40_client_aucune_commande', 'Aucune commande'),
+  settings('41_client_parametres', 'Paramètres');
 
   const DropScreen(this.id, this.label);
   final String id;
   final String label;
   String get route => '/$id';
   String get number => id.substring(0, 2);
-  bool get inAccount => index >= profile.index;
+  bool get inAccount => index >= profile.index || index >= aroundMe.index;
 
   static DropScreen? fromRoute(String? name) {
     if (name == null || name == '/') return splash;
@@ -47,6 +65,19 @@ const screenGroups = <String, List<DropScreen>>{
   'Espace client': [
     DropScreen.profile, DropScreen.editProfile, DropScreen.addresses,
     DropScreen.help, DropScreen.contact,
+  ],
+  'Découverte Layla': [
+    DropScreen.aroundMe, DropScreen.flashOffers, DropScreen.search,
+    DropScreen.filters, DropScreen.categories, DropScreen.offerDetail,
+    DropScreen.shopDetail, DropScreen.favorites, DropScreen.notifications,
+  ],
+  'Commandes Layla': [
+    DropScreen.orders, DropScreen.orderDetail, DropScreen.purchaseHistory,
+    DropScreen.review,
+  ],
+  'Préférences Layla': [
+    DropScreen.preferences, DropScreen.proximityAlerts, DropScreen.noOffers,
+    DropScreen.noOrders, DropScreen.settings,
   ],
 };
 

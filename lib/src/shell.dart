@@ -104,7 +104,7 @@ class _ScreenMenu extends StatelessWidget {
         const LogoMark(size: 36), const SizedBox(width: 10),
         Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Text('LocalDrop', style: headingStyle.copyWith(fontSize: 23)),
-          const Text('Parcours de Chaimae', style: TextStyle(fontSize: 12, color: muted)),
+          const Text('Parcours client Layla', style: TextStyle(fontSize: 12, color: muted)),
         ])),
       ])),
     const Divider(height: 1, color: line),
@@ -138,26 +138,27 @@ class _AccountNavigation extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const items = [
-      ('Accueil', Icons.home_outlined, TeamScreen.clientHome),
-      ('Explorer', Icons.search_rounded, TeamScreen.explore),
-      ('Commandes', Icons.receipt_long_outlined, TeamScreen.orders),
-      ('Profil', Icons.person_outline_rounded, null),
+      ('Accueil', Icons.home_outlined, DropScreen.aroundMe),
+      ('Explorer', Icons.search_rounded, DropScreen.flashOffers),
+      ('Commandes', Icons.receipt_long_outlined, DropScreen.orders),
+      ('Favoris', Icons.favorite_border_rounded, DropScreen.favorites),
     ];
     return DecoratedBox(decoration: const BoxDecoration(color: Colors.white,
       border: Border(top: BorderSide(color: line))),
       child: Row(children: [for (final (label, icon, target) in items)
         Expanded(child: InkWell(onTap: () {
-          if (target != null) {
-            openTeam(context, target);
-          } else if (ModalRoute.of(context)?.settings.name != DropScreen.profile.route) {
-            go(context, DropScreen.profile);
+          if (ModalRoute.of(context)?.settings.name != target.route) {
+            go(context, target);
           }
         }, child: Padding(padding: const EdgeInsets.symmetric(vertical: 10),
           child: Column(mainAxisSize: MainAxisSize.min, children: [
-            Icon(icon, size: 21, color: target == null ? forest : muted),
+            Icon(icon, size: 21, color: ModalRoute.of(context)?.settings.name == target.route ? forest : muted),
             const SizedBox(height: 3),
-            Text(label, style: TextStyle(fontSize: 10, color: target == null ? forest : muted,
-                fontWeight: target == null ? FontWeight.w700 : FontWeight.normal)),
+            Text(label, style: TextStyle(
+              fontSize: 10,
+              color: ModalRoute.of(context)?.settings.name == target.route ? forest : muted,
+              fontWeight: ModalRoute.of(context)?.settings.name == target.route ? FontWeight.w700 : FontWeight.normal,
+            )),
           ])))),
       ]));
   }

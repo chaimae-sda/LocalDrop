@@ -1,4 +1,4 @@
-# LocalDrop — écrans de Chaimae
+# LocalDrop — parcours client de Layla
 
 Frontend Flutter en français. Le projet s’ouvre dans VS Code à la racine du dépôt, au niveau du fichier `pubspec.yaml`. La cible fournie est le navigateur Web, avec un affichage mobile et un sélecteur d’écrans sur ordinateur.
 
@@ -34,6 +34,12 @@ signature de publication. L’identifiant généré est `com.localdrop.localdrop
 - L’inscription, les permissions, la réinitialisation et le support sont simulés localement. Les changements de la session se réinitialisent au rechargement de la page.
 
 ## Écrans attribués
+
+### Parcours Layla
+
+La branche `feature/layla-client-experience` ouvre directement l’écran 13 « Autour de moi ».
+Elle contient les écrans 13 à 21, 28 à 31, 35 à 36 et 39 à 41, avec données fictives,
+navigation indépendante, favoris, filtres, commandes, avis, préférences et alertes.
 
 | Parcours | Écrans |
 | --- | --- |
