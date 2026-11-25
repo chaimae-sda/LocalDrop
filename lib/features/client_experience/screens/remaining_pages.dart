@@ -5,6 +5,8 @@ import '../../../src/screens.dart';
 import '../../../src/ui.dart';
 import '../controllers/client_controller.dart';
 import '../data/sample_data.dart';
+import '../models/client_models.dart';
+import 'client_experience_pages.dart';
 import 'preferences_pages.dart';
 
 class ShopDetailPage extends StatelessWidget {
@@ -12,7 +14,14 @@ class ShopDetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final shop = shops[0];
+    final controller = ClientExperienceScope.of(context);
+    final shop = shops.firstWhere(
+      (item) => item.id == controller.selectedShopId,
+      orElse: () => shops.first,
+    );
+    final availableOffers = offers
+        .where((offer) => offer.shopId == shop.id && offer.available > 0)
+        .toList();
     return PageScroll(
       padding: const EdgeInsets.fromLTRB(16, 10, 16, 20),
       children: [
@@ -31,6 +40,26 @@ class ShopDetailPage extends StatelessWidget {
           '${shop.category} · ${shop.distance.toStringAsFixed(1)} km',
           style: copyStyle,
         ),
+        const SizedBox(height: 14),
+        Row(
+          children: [
+            const Expanded(child: Text('Offres en cours', style: strongStyle)),
+            Pill(
+              '${availableOffers.length} disponible${availableOffers.length > 1 ? 's' : ''}',
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        if (availableOffers.isEmpty)
+          const SurfaceCard(
+            child: Text(
+              'Aucune offre disponible actuellement',
+              style: copyStyle,
+              textAlign: TextAlign.center,
+            ),
+          )
+        else
+          for (final offer in availableOffers) OfferCard(offer: offer),
         const SizedBox(height: 12),
         SurfaceCard(
           child: Column(
@@ -65,6 +94,23 @@ class ShopDetailPage extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 14),
+        OutlinedButton.icon(
+          onPressed: () {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Itinéraire simulé vers le commerce'),
+              ),
+            );
+          },
+          icon: const Icon(Icons.directions_outlined),
+          style: OutlinedButton.styleFrom(
+            foregroundColor: forest,
+            minimumSize: const Size.fromHeight(48),
+            side: const BorderSide(color: forest),
+          ),
+          label: const Text('Voir l’itinéraire'),
+        ),
+        const SizedBox(height: 12),
         Text('Offres du commerce', style: strongStyle),
         const SizedBox(height: 8),
         DropButton(
@@ -134,7 +180,10 @@ class FavoritesPage extends StatelessWidget {
                       ),
                     ),
                     TextButton(
-                      onPressed: () => go(context, DropScreen.offerDetail),
+                      onPressed: () {
+                        ClientExperienceScope.of(context).selectOffer(offer.id);
+                        go(context, DropScreen.offerDetail);
+                      },
                       child: const Text('Voir l’offre'),
                     ),
                   ],
@@ -211,8 +260,10 @@ class NotificationsPage extends StatelessWidget {
                               ),
                               if (item.offerId != null)
                                 TextButton(
-                                  onPressed: () =>
-                                      go(context, DropScreen.offerDetail),
+                                  onPressed: () {
+                                    controller.selectOffer(item.offerId!);
+                                    go(context, DropScreen.offerDetail);
+                                  },
                                   child: const Text('Voir l’offre'),
                                 ),
                               if (item.offerId == null)
@@ -372,44 +423,126 @@ class PurchaseHistoryPage extends StatelessWidget {
   const PurchaseHistoryPage({super.key});
 
   @override
-  Widget build(BuildContext context) => PageScroll(
-    padding: const EdgeInsets.fromLTRB(16, 10, 16, 20),
-    children: [
-      for (final order in orders)
-        Padding(
-          padding: const EdgeInsets.only(bottom: 12),
-          child: SurfaceCard(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Wrap(
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  spacing: 8,
-                  runSpacing: 4,
-                  children: [
-                    Text(order.offerName, style: strongStyle),
-                    Pill(order.status),
-                  ],
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  '${order.shop} · ${order.amount.toStringAsFixed(2)} €',
-                  style: copyStyle,
-                ),
-                if (order.status == 'Terminée')
-                  TextButton(
-                    onPressed: () => go(context, DropScreen.review),
-                    child: const Text('Donner mon avis'),
-                  )
-                else
-                  TextButton(
-                    onPressed: () => go(context, DropScreen.orderDetail),
-                    child: const Text('Voir le détail'),
+  Widget build(BuildContext context) {
+    final controller = ClientExperienceScope.of(context);
+    final eligibleOrders = orders
+        .where(
+          (order) =>
+              order.status == 'Terminée' &&
+              !controller.isOrderReviewed(order.id),
+        )
+        .toList();
+
+    void openReview(ClientOrder order) {
+      controller.selectOrder(order.id);
+      go(context, DropScreen.review);
+    }
+
+    return PageScroll(
+      padding: const EdgeInsets.fromLTRB(16, 10, 16, 20),
+      children: [
+        for (final order in orders)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: SurfaceCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Wrap(
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    spacing: 8,
+                    runSpacing: 4,
+                    children: [
+                      Text(order.offerName, style: strongStyle),
+                      Pill(order.status),
+                    ],
                   ),
-              ],
+                  const SizedBox(height: 6),
+                  Text(
+                    '${order.shop} · ${order.amount.toStringAsFixed(2)} €',
+                    style: copyStyle,
+                  ),
+                  if (order.status == 'Terminée')
+                    controller.isOrderReviewed(order.id)
+                        ? const Text(
+                            'Avis déjà envoyé',
+                            style: TextStyle(
+                              color: success,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          )
+                        : TextButton(
+                            onPressed: () => openReview(order),
+                            child: const Text('Donner mon avis'),
+                          )
+                  else
+                    TextButton(
+                      onPressed: () => go(context, DropScreen.orderDetail),
+                      child: const Text('Voir le détail'),
+                    ),
+                ],
+              ),
             ),
           ),
+        const SizedBox(height: 4),
+        OutlinedButton.icon(
+          onPressed: () {
+            if (eligibleOrders.isEmpty) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Toutes les commandes ont déjà reçu un avis.'),
+                ),
+              );
+              return;
+            }
+            if (eligibleOrders.length == 1) {
+              openReview(eligibleOrders.first);
+              return;
+            }
+            showModalBottomSheet<void>(
+              context: context,
+              showDragHandle: true,
+              builder: (sheet) => SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const Text('Choisir une commande', style: strongStyle),
+                      const SizedBox(height: 10),
+                      for (final order in eligibleOrders)
+                        ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          title: Text(order.offerName, style: strongStyle),
+                          subtitle: Text(order.shop, style: copyStyle),
+                          trailing: const Icon(Icons.chevron_right),
+                          onTap: () {
+                            Navigator.pop(sheet);
+                            openReview(order);
+                          },
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+          icon: const Icon(Icons.star_outline_rounded),
+          style: OutlinedButton.styleFrom(
+            foregroundColor: forest,
+            minimumSize: const Size.fromHeight(48),
+            side: const BorderSide(color: forest),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(11),
+            ),
+          ),
+          label: const Text(
+            'Donner mon avis',
+            style: TextStyle(color: forest, fontWeight: FontWeight.w700),
+          ),
         ),
-    ],
-  );
+      ],
+    );
+  }
 }

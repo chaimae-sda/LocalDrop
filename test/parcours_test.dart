@@ -218,4 +218,33 @@ void main() {
       expect(tester.takeException(), isNull, reason: screen.id);
     }
   });
+
+  testWidgets('Suggestions, filtres, catégories et avis Layla', (tester) async {
+    await openPage(tester, DropScreen.search);
+    await tester.enterText(find.byType(TextField).first, 'boulangerie');
+    await tester.pumpAndSettle();
+    expect(find.text('Suggestions'), findsOneWidget);
+    expect(find.text('Boulangerie du Pont'), findsOneWidget);
+
+    await openPage(tester, DropScreen.filters);
+    expect(find.text('Autour de ma position'), findsOneWidget);
+    expect(find.textContaining('Voir les'), findsOneWidget);
+    await tapVisible(tester, find.text('Boucherie'));
+    expect(find.textContaining('Voir les'), findsOneWidget);
+    await tapVisible(tester, find.text('Moins de 10 €'));
+    await tapVisible(tester, find.textContaining('Voir les'));
+
+    await openPage(tester, DropScreen.categories);
+    expect(find.text('Boucheries'), findsOneWidget);
+    expect(find.text('Boulangerie'), findsOneWidget);
+    expect(find.textContaining('panier'), findsWidgets);
+
+    await openPage(tester, DropScreen.shopDetail);
+    expect(find.text('Offres en cours'), findsOneWidget);
+    expect(find.text('Aucune offre disponible actuellement'), findsNothing);
+    expect(find.text('Voir l’itinéraire'), findsOneWidget);
+
+    await openPage(tester, DropScreen.purchaseHistory);
+    expect(find.text('Donner mon avis'), findsWidgets);
+  });
 }

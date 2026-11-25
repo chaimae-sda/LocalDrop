@@ -1,8 +1,21 @@
 import '../models/client_models.dart';
 
+const canonicalCategories = <String>[
+  'Toutes',
+  'Boulangerie',
+  'Boucherie',
+  'Primeur',
+  'Traiteur',
+  'Épicerie',
+  'Fruits & légumes',
+  'Restaurant',
+  'Pâtisserie',
+];
+
 const offers = <FlashOffer>[
   FlashOffer(
     id: 'boulangerie',
+    shopId: 'boulangerie-du-pont',
     name: 'Panier surprise boulangerie',
     category: 'Boulangerie',
     shop: 'Boulangerie du Pont',
@@ -18,8 +31,9 @@ const offers = <FlashOffer>[
   ),
   FlashOffer(
     id: 'bio',
+    shopId: 'marche-bio-central',
     name: 'Panier fruits & légumes',
-    category: 'Bio',
+    category: 'Fruits & légumes',
     shop: 'Marché Bio Central',
     address: '4 place du Marché',
     imageUrl: 'https://images.unsplash.com/photo-1542838132-92c53300491e',
@@ -33,6 +47,7 @@ const offers = <FlashOffer>[
   ),
   FlashOffer(
     id: 'epicerie',
+    shopId: 'epicerie-les-delices',
     name: 'Box douceurs & boissons',
     category: 'Épicerie',
     shop: 'Épicerie Les Délices',
@@ -48,6 +63,7 @@ const offers = <FlashOffer>[
   ),
   FlashOffer(
     id: 'restaurant',
+    shopId: 'la-table-du-coin',
     name: 'Menu du soir',
     category: 'Restaurant',
     shop: 'La Table du Coin',
@@ -61,10 +77,75 @@ const offers = <FlashOffer>[
     description:
         'Une entrée et un plat du jour proposés par notre cuisine locale.',
   ),
+  FlashOffer(
+    id: 'boucherie',
+    shopId: 'boucherie-des-halles',
+    name: 'Panier viandes & charcuterie',
+    category: 'Boucherie',
+    shop: 'Boucherie des Halles',
+    address: '22 rue des Halles',
+    imageUrl: 'https://images.unsplash.com/photo-1607623814075-e51df1bdc82f',
+    originalPrice: 28,
+    price: 9.50,
+    discount: 66,
+    distance: 2.1,
+    available: 6,
+    description:
+        'Pièces préparées du jour et charcuterie artisanale dans un panier surprise.',
+  ),
+  FlashOffer(
+    id: 'primeur',
+    shopId: 'primeur-du-marche',
+    name: 'Corbeille de légumes du jour',
+    category: 'Primeur',
+    shop: 'Primeur du Marché',
+    address: '6 place du Marché',
+    imageUrl: 'https://images.unsplash.com/photo-1566385101042-1a0aa0c1268c',
+    originalPrice: 16,
+    price: 5.80,
+    discount: 64,
+    distance: 1.4,
+    available: 7,
+    description: 'Une sélection de légumes frais issue de producteurs proches.',
+  ),
+  FlashOffer(
+    id: 'traiteur',
+    shopId: 'traiteur-saveurs',
+    name: 'Assortiment de salades traiteur',
+    category: 'Traiteur',
+    shop: 'Saveurs & Traiteur',
+    address: '14 rue Victor Hugo',
+    imageUrl: 'https://images.unsplash.com/photo-1547592180-85f173990554',
+    originalPrice: 22,
+    price: 8.90,
+    discount: 60,
+    distance: 2.7,
+    available: 4,
+    description:
+        'Salades fraîches, quiches et petits plats préparés dans la journée.',
+  ),
+  FlashOffer(
+    id: 'patisserie',
+    shopId: 'patisserie-madeleine',
+    name: 'Box pâtisseries du jour',
+    category: 'Pâtisserie',
+    shop: 'Pâtisserie Madeleine',
+    address: '3 rue Madeleine',
+    imageUrl: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587',
+    originalPrice: 19,
+    price: 7.50,
+    discount: 61,
+    distance: 1.9,
+    available: 5,
+    pickupLimit: '18h45',
+    description:
+        'Une sélection de douceurs, tartes et pâtisseries préparées ce matin.',
+  ),
 ];
 
 const shops = <LocalShop>[
   LocalShop(
+    id: 'boulangerie-du-pont',
     name: 'Boulangerie du Pont',
     category: 'Boulangerie',
     address: '18 rue du Pont, Paris',
@@ -74,8 +155,9 @@ const shops = <LocalShop>[
         'Une boulangerie de quartier qui fabrique ses pains et viennoiseries chaque matin.',
   ),
   LocalShop(
+    id: 'marche-bio-central',
     name: 'Marché Bio Central',
-    category: 'Bio',
+    category: 'Fruits & légumes',
     address: '4 place du Marché, Paris',
     hours: 'Tous les jours : 8h - 19h',
     distance: 0.8,
@@ -83,6 +165,7 @@ const shops = <LocalShop>[
         'Des fruits et légumes frais issus de producteurs partenaires locaux.',
   ),
   LocalShop(
+    id: 'epicerie-les-delices',
     name: 'Épicerie Les Délices',
     category: 'Épicerie',
     address: '31 avenue des Lilas, Paris',
@@ -90,6 +173,55 @@ const shops = <LocalShop>[
     distance: 1.2,
     description:
         'Épicerie conviviale proposant des produits locaux et gourmands.',
+  ),
+  LocalShop(
+    id: 'la-table-du-coin',
+    name: 'La Table du Coin',
+    category: 'Restaurant',
+    address: '9 rue des Cordiers, Paris',
+    hours: 'Du mardi au dimanche : 12h - 23h',
+    distance: 1.6,
+    description:
+        'Cuisine de quartier préparée avec des produits locaux et de saison.',
+  ),
+  LocalShop(
+    id: 'boucherie-des-halles',
+    name: 'Boucherie des Halles',
+    category: 'Boucherie',
+    address: '22 rue des Halles, Paris',
+    hours: 'Lundi - samedi : 8h - 19h30',
+    distance: 2.1,
+    description:
+        'Boucherie artisanale proposant des produits locaux et des préparations maison.',
+  ),
+  LocalShop(
+    id: 'primeur-du-marche',
+    name: 'Primeur du Marché',
+    category: 'Primeur',
+    address: '6 place du Marché, Paris',
+    hours: 'Tous les jours : 7h30 - 19h',
+    distance: 1.4,
+    description: 'Fruits et légumes frais sélectionnés chaque matin.',
+  ),
+  LocalShop(
+    id: 'traiteur-saveurs',
+    name: 'Saveurs & Traiteur',
+    category: 'Traiteur',
+    address: '14 rue Victor Hugo, Paris',
+    hours: 'Du mardi au samedi : 10h - 20h',
+    distance: 2.7,
+    description:
+        'Traiteur gourmand proposant des préparations maison pour tous les jours.',
+  ),
+  LocalShop(
+    id: 'patisserie-madeleine',
+    name: 'Pâtisserie Madeleine',
+    category: 'Pâtisserie',
+    address: '3 rue Madeleine, Paris',
+    hours: 'Du mardi au dimanche : 8h - 19h',
+    distance: 1.9,
+    description:
+        'Pâtisserie artisanale connue pour ses viennoiseries et ses tartes du jour.',
   ),
 ];
 

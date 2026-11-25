@@ -4,6 +4,7 @@ import '../../../src/navigation.dart';
 import '../../../src/screens.dart';
 import '../../../src/ui.dart';
 import '../controllers/client_controller.dart';
+import '../data/sample_data.dart';
 
 class ReviewPage extends StatefulWidget {
   const ReviewPage({super.key});
@@ -23,68 +24,75 @@ class _ReviewPageState extends State<ReviewPage> {
   }
 
   @override
-  Widget build(BuildContext context) => PageScroll(
-    padding: const EdgeInsets.fromLTRB(16, 10, 16, 20),
-    children: [
-      const Text('Votre avis', style: headingStyle),
-      const SizedBox(height: 8),
-      const Text(
-        'Panier fruits & légumes · Marché Bio Central',
-        style: copyStyle,
-      ),
-      const SizedBox(height: 18),
-      Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: List.generate(5, (index) {
-          final value = index + 1;
-          return IconButton(
-            onPressed: () => setState(() => rating = value),
-            icon: Icon(
-              value <= rating ? Icons.star_rounded : Icons.star_outline_rounded,
-              color: value <= rating ? orange : muted,
-              size: 38,
-            ),
-          );
-        }),
-      ),
-      const SizedBox(height: 12),
-      TextField(
-        controller: comment,
-        maxLines: 5,
-        decoration: const InputDecoration(hintText: 'Votre commentaire'),
-      ),
-      const SizedBox(height: 16),
-      DropButton(
-        'Valider mon avis',
-        icon: Icons.check,
-        onPressed: () {
-          if (rating == 0) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Sélectionnez une note avant de valider.'),
+  Widget build(BuildContext context) {
+    final controller = ClientExperienceScope.of(context);
+    final order = orders.firstWhere(
+      (item) => item.id == controller.selectedOrderId,
+      orElse: () => orders.first,
+    );
+    return PageScroll(
+      padding: const EdgeInsets.fromLTRB(16, 10, 16, 20),
+      children: [
+        const Text('Votre avis', style: headingStyle),
+        const SizedBox(height: 8),
+        Text('${order.offerName} · ${order.shop}', style: copyStyle),
+        const SizedBox(height: 18),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: List.generate(5, (index) {
+            final value = index + 1;
+            return IconButton(
+              onPressed: () => setState(() => rating = value),
+              icon: Icon(
+                value <= rating
+                    ? Icons.star_rounded
+                    : Icons.star_outline_rounded,
+                color: value <= rating ? orange : muted,
+                size: 38,
               ),
             );
-            return;
-          }
-          showDialog<void>(
-            context: context,
-            builder: (dialog) => AlertDialog(
-              title: const Text('Merci pour votre avis'),
-              content: const Text(
-                'Votre avis a été enregistré localement pour cette démonstration.',
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(dialog),
-                  child: const Text('OK'),
+          }),
+        ),
+        const SizedBox(height: 12),
+        TextField(
+          controller: comment,
+          maxLines: 5,
+          decoration: const InputDecoration(hintText: 'Votre commentaire'),
+        ),
+        const SizedBox(height: 16),
+        DropButton(
+          'Valider mon avis',
+          icon: Icons.check,
+          onPressed: () {
+            if (rating == 0) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Sélectionnez une note avant de valider.'),
                 ),
-              ],
-            ),
-          );
-        },
-      ),
-    ],
-  );
+              );
+              return;
+            }
+            showDialog<void>(
+              context: context,
+              builder: (dialog) => AlertDialog(
+                title: const Text('Merci pour votre avis'),
+                content: const Text(
+                  'Votre avis a été enregistré localement pour cette démonstration.',
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(dialog),
+                    child: const Text('OK'),
+                  ),
+                ],
+              ),
+            );
+            controller.submitReview(order.id);
+          },
+        ),
+      ],
+    );
+  }
 }
 
 class PreferencesPage extends StatefulWidget {
@@ -95,12 +103,21 @@ class PreferencesPage extends StatefulWidget {
 }
 
 class _PreferencesPageState extends State<PreferencesPage> {
-  final selected = <String>{'Bio', 'Boulangerie'};
+  final selected = <String>{'Fruits & légumes', 'Boulangerie'};
   bool ecoMode = true;
 
   @override
   Widget build(BuildContext context) {
-    const categories = ['Boulangerie', 'Bio', 'Épicerie', 'Restaurant'];
+    const categories = [
+      'Boulangerie',
+      'Boucherie',
+      'Primeur',
+      'Traiteur',
+      'Épicerie',
+      'Fruits & légumes',
+      'Restaurant',
+      'Pâtisserie',
+    ];
     return PageScroll(
       padding: const EdgeInsets.fromLTRB(16, 10, 16, 20),
       children: [

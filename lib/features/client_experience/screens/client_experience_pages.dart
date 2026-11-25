@@ -110,7 +110,7 @@ class AroundMePage extends StatelessWidget {
           ),
         ],
       ),
-      for (final offer in offers.take(3)) _OfferCard(offer: offer),
+      for (final offer in offers.take(3)) OfferCard(offer: offer),
     ],
   );
 }
@@ -156,6 +156,7 @@ class FlashOffersPage extends StatelessWidget {
           offer.price > controller.maxPrice)
         return false;
       if (controller.availableOnly && offer.available < 1) return false;
+      if (controller.pickupTodayOnly && !offer.pickupToday) return false;
       if (controller.selectedCategories.isNotEmpty &&
           !controller.selectedCategories.contains(offer.category))
         return false;
@@ -197,14 +198,14 @@ class FlashOffersPage extends StatelessWidget {
             message: 'Élargissez votre rayon ou réinitialisez les filtres.',
           )
         else
-          for (final offer in filtered) _OfferCard(offer: offer),
+          for (final offer in filtered) OfferCard(offer: offer),
       ],
     );
   }
 }
 
-class _OfferCard extends StatelessWidget {
-  const _OfferCard({required this.offer});
+class OfferCard extends StatelessWidget {
+  const OfferCard({super.key, required this.offer});
   final FlashOffer offer;
 
   @override
@@ -213,7 +214,10 @@ class _OfferCard extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: InkWell(
-        onTap: () => go(context, DropScreen.offerDetail),
+        onTap: () {
+          controller.selectOffer(offer.id);
+          go(context, DropScreen.offerDetail);
+        },
         borderRadius: BorderRadius.circular(16),
         child: SurfaceCard(
           padding: 10,
@@ -256,6 +260,11 @@ class _OfferCard extends StatelessWidget {
               Text(
                 '${offer.shop} · ${offer.distance.toStringAsFixed(1)} km',
                 style: copyStyle,
+              ),
+              const SizedBox(height: 3),
+              Text(
+                'Retrait avant ${offer.pickupLimit}',
+                style: copyStyle.copyWith(fontSize: 12),
               ),
               const SizedBox(height: 7),
               Wrap(
@@ -362,14 +371,128 @@ class _SearchPageState extends State<SearchPage> {
                       .contains(normalized),
                 )
                 .toList();
-            if (results.isEmpty) {
-              return const EmptyStatePage(
-                title: 'Aucun résultat',
-                message: 'Essayez un autre produit, commerce ou catégorie.',
-              );
-            }
+            final matchingShops = shops
+                .where(
+                  (shop) => '${shop.name} ${shop.category}'
+                      .toLowerCase()
+                      .contains(normalized),
+                )
+                .toList();
+            final productSuggestions = offers
+                .where(
+                  (offer) =>
+                      offer.name.toLowerCase().contains(normalized) ||
+                      normalized.contains(offer.category.toLowerCase()) ||
+                      normalized.contains('viennoiserie') &&
+                          '${offer.name} ${offer.description}'
+                              .toLowerCase()
+                              .contains('boulanger'),
+                )
+                .map((offer) => offer.name)
+                .toSet()
+                .toList();
+            final searchSuggestions = productSuggestions.isNotEmpty
+                ? productSuggestions
+                      .take(2)
+                      .map((name) => 'Paniers : $name')
+                      .toList()
+                : offers
+                      .map((offer) => offer.category)
+                      .toSet()
+                      .where(
+                        (category) =>
+                            normalized.isNotEmpty &&
+                            (category.toLowerCase().contains(normalized) ||
+                                normalized.contains(category.toLowerCase())),
+                      )
+                      .map((category) => 'Paniers $category')
+                      .take(2)
+                      .toList();
+
             return Column(
-              children: [for (final offer in results) _OfferCard(offer: offer)],
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (results.isNotEmpty)
+                  for (final offer in results) OfferCard(offer: offer)
+                else
+                  const EmptyStatePage(
+                    title: 'Aucun résultat',
+                    message: 'Essayez un autre produit, commerce ou catégorie.',
+                  ),
+                if (matchingShops.isNotEmpty ||
+                    searchSuggestions.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  const Text('Suggestions', style: strongStyle),
+                  const SizedBox(height: 8),
+                  for (final shop in matchingShops)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: InkWell(
+                        onTap: () {
+                          ClientExperienceScope.of(context).selectShop(shop.id);
+                          go(context, DropScreen.shopDetail);
+                        },
+                        child: SurfaceCard(
+                          padding: 10,
+                          child: Row(
+                            children: [
+                              const CircleAvatar(
+                                backgroundColor: mint,
+                                child: Icon(
+                                  Icons.storefront_outlined,
+                                  color: forest,
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(shop.name, style: strongStyle),
+                                    Text(
+                                      '${shop.distance.toStringAsFixed(1)} km · ${shop.hours}',
+                                      style: copyStyle.copyWith(fontSize: 12),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const Icon(Icons.chevron_right, color: muted),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  for (final suggestion in searchSuggestions)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: InkWell(
+                        onTap: () {
+                          final text = suggestion
+                              .replaceFirst('Paniers : ', '')
+                              .replaceFirst('Paniers ', '');
+                          controller.text = text;
+                          setState(() => query = text);
+                        },
+                        child: SurfaceCard(
+                          padding: 10,
+                          child: Row(
+                            children: [
+                              const CircleAvatar(
+                                backgroundColor: mint,
+                                child: Icon(Icons.search, color: forest),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Text(suggestion, style: strongStyle),
+                              ),
+                              const Icon(Icons.chevron_right, color: muted),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ],
             );
           },
         ),
@@ -388,6 +511,8 @@ class _FiltersPageState extends State<FiltersPage> {
   late double distance;
   late double price;
   late bool available;
+  late bool pickupToday;
+  late bool allPrices;
   late Set<String> categories;
 
   @override
@@ -397,65 +522,148 @@ class _FiltersPageState extends State<FiltersPage> {
     distance = controller.maxDistance;
     price = controller.maxPrice;
     available = controller.availableOnly;
+    pickupToday = controller.pickupTodayOnly;
+    allPrices = controller.allPrices;
     categories = {...controller.selectedCategories};
+  }
+
+  int get filteredCount {
+    var count = offers.where((offer) {
+      if (offer.distance > distance) return false;
+      if (!allPrices && offer.price >= 10) return false;
+      if (categories.isNotEmpty &&
+          categories.contains('Toutes') == false &&
+          !categories.contains(offer.category))
+        return false;
+      if (available && offer.available <= 0) return false;
+      if (pickupToday && !offer.pickupToday) return false;
+      return true;
+    }).length;
+    return count;
   }
 
   @override
   Widget build(BuildContext context) {
-    final allCategories = offers.map((offer) => offer.category).toSet();
+    const filterCategories = <String>[
+      'Toutes',
+      'Boulangerie',
+      'Boucherie',
+      'Primeur',
+      'Traiteur',
+      'Épicerie',
+      'Fruits & légumes',
+      'Restaurant',
+      'Pâtisserie',
+    ];
     return PageScroll(
       padding: const EdgeInsets.fromLTRB(16, 10, 16, 20),
       children: [
-        Text('Distance', style: strongStyle),
+        const Text('Catégories', style: strongStyle),
+        const SizedBox(height: 8),
+        GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            crossAxisSpacing: 8,
+            mainAxisSpacing: 8,
+            childAspectRatio: 2.7,
+          ),
+          itemCount: filterCategories.length,
+          itemBuilder: (context, index) {
+            final category = filterCategories[index];
+            final selected = category == 'Toutes'
+                ? categories.isEmpty
+                : categories.contains(category);
+            return InkWell(
+              onTap: () => setState(() {
+                if (category == 'Toutes') {
+                  categories.clear();
+                } else {
+                  categories.remove('Toutes');
+                  if (selected) {
+                    categories.remove(category);
+                  } else {
+                    categories.add(category);
+                  }
+                }
+              }),
+              child: Container(
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: selected ? mint : Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: selected ? success : line),
+                ),
+                child: Text(
+                  category,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: selected ? forest : ink,
+                    fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+        const SizedBox(height: 18),
+        const Text('Distance maximale', style: strongStyle),
+        const SizedBox(height: 4),
+        const Text('Autour de ma position', style: copyStyle),
         Slider(
           value: distance,
           min: 0.5,
-          max: 10,
-          divisions: 19,
-          label: '${distance.toStringAsFixed(1)} km',
+          max: 5,
+          divisions: 9,
+          label: distance < 1
+              ? '${(distance * 1000).round()} m'
+              : '${distance.toStringAsFixed(1)} km',
           onChanged: (value) => setState(() => distance = value),
         ),
         Align(
           alignment: Alignment.centerRight,
-          child: Text('${distance.toStringAsFixed(1)} km'),
+          child: Text(
+            distance < 1
+                ? '${(distance * 1000).round()} m'
+                : '${distance.toStringAsFixed(1)} km',
+            style: strongStyle,
+          ),
         ),
-        const SizedBox(height: 14),
-        Text('Prix maximum', style: strongStyle),
-        Slider(
-          value: price,
-          min: 5,
-          max: 30,
-          divisions: 25,
-          label: '${price.toStringAsFixed(0)} €',
-          onChanged: (value) => setState(() => price = value),
-        ),
-        Align(
-          alignment: Alignment.centerRight,
-          child: Text('${price.toStringAsFixed(0)} €'),
-        ),
-        const SizedBox(height: 14),
-        Text('Catégories', style: strongStyle),
+        const SizedBox(height: 18),
+        const Text('Prix maximum', style: strongStyle),
         const SizedBox(height: 8),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: allCategories
-              .map(
-                (category) => FilterChip(
-                  label: Text(category),
-                  selected: categories.contains(category),
-                  onSelected: (selected) => setState(() {
-                    if (selected) {
-                      categories.add(category);
-                    } else {
-                      categories.remove(category);
-                    }
-                  }),
+        Row(
+          children: [
+            Expanded(
+              child: OutlinedButton(
+                onPressed: () => setState(() => allPrices = false),
+                style: OutlinedButton.styleFrom(
+                  backgroundColor: allPrices ? Colors.white : mint,
+                  foregroundColor: forest,
+                  side: BorderSide(color: allPrices ? line : success),
+                  minimumSize: const Size(0, 48),
                 ),
-              )
-              .toList(),
+                child: const Text('Moins de 10 €'),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: OutlinedButton(
+                onPressed: () => setState(() => allPrices = true),
+                style: OutlinedButton.styleFrom(
+                  backgroundColor: allPrices ? mint : Colors.white,
+                  foregroundColor: forest,
+                  side: BorderSide(color: allPrices ? success : line),
+                  minimumSize: const Size(0, 48),
+                ),
+                child: const Text('Tous les prix'),
+              ),
+            ),
+          ],
         ),
-        const SizedBox(height: 14),
+        const SizedBox(height: 18),
+        const Text('Afficher uniquement', style: strongStyle),
         Material(
           color: Colors.white,
           child: SwitchListTile(
@@ -464,20 +672,32 @@ class _FiltersPageState extends State<FiltersPage> {
               'Offres disponibles uniquement',
               style: strongStyle,
             ),
+            subtitle: const Text('Panier en stock'),
             value: available,
             onChanged: (value) => setState(() => available = value),
           ),
         ),
+        Material(
+          color: Colors.white,
+          child: SwitchListTile(
+            contentPadding: EdgeInsets.zero,
+            title: const Text('Retrait aujourd’hui', style: strongStyle),
+            value: pickupToday,
+            onChanged: (value) => setState(() => pickupToday = value),
+          ),
+        ),
         const SizedBox(height: 14),
         DropButton(
-          'Appliquer les filtres',
+          'Voir les $filteredCount offres',
           icon: Icons.check,
           onPressed: () {
             ClientExperienceScope.of(context).setFilters(
               distance: distance,
-              price: price,
+              price: allPrices ? 30 : 10,
               categories: categories,
               available: available,
+              pickupToday: pickupToday,
+              allPrices: allPrices,
             );
             go(context, DropScreen.flashOffers, replace: true);
           },
@@ -489,9 +709,11 @@ class _FiltersPageState extends State<FiltersPage> {
           onPressed: () {
             ClientExperienceScope.of(context).resetFilters();
             setState(() {
-              distance = 5;
+              distance = 2;
               price = 25;
               available = false;
+              pickupToday = false;
+              allPrices = true;
               categories.clear();
             });
           },
@@ -504,11 +726,13 @@ class _FiltersPageState extends State<FiltersPage> {
 class CategoriesPage extends StatelessWidget {
   const CategoriesPage({super.key});
 
-  static const entries = <(String, IconData, Color)>[
-    ('Boulangerie', Icons.bakery_dining_outlined, Color(0xFFF8DDBD)),
-    ('Bio', Icons.eco_outlined, Color(0xFFDCEEDA)),
-    ('Épicerie', Icons.shopping_basket_outlined, Color(0xFFE5E4F5)),
-    ('Restaurant', Icons.restaurant_outlined, Color(0xFFFFDFD2)),
+  static const entries = <(String, String, IconData)>[
+    ('Boulangerie', 'Boulangerie', Icons.bakery_dining_outlined),
+    ('Boucheries', 'Boucherie', Icons.set_meal_outlined),
+    ('Fruits & légumes', 'Fruits & légumes', Icons.eco_outlined),
+    ('Restaurant', 'Restaurant', Icons.restaurant_outlined),
+    ('Épiceries', 'Épicerie', Icons.shopping_basket_outlined),
+    ('Pâtisseries', 'Pâtisserie', Icons.cake_outlined),
   ];
 
   @override
@@ -520,46 +744,66 @@ class CategoriesPage extends StatelessWidget {
         'Explorez les envies du jour autour de vous.',
       ),
       const SizedBox(height: 16),
-      GridView.count(
-        crossAxisCount: 2,
-        mainAxisSpacing: 10,
-        crossAxisSpacing: 10,
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        children: entries
-            .map(
-              (entry) => InkWell(
-                onTap: () {
-                  ClientExperienceScope.of(context).setFilters(
-                    distance: 10,
-                    price: 30,
-                    categories: {entry.$1},
-                    available: false,
-                  );
-                  go(context, DropScreen.flashOffers);
-                },
-                child: Container(
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: entry.$3,
-                    borderRadius: BorderRadius.circular(16),
+      Column(
+        children: [
+          for (final entry in entries) ...[
+            Builder(
+              builder: (context) {
+                final count = offers
+                    .where(
+                      (offer) =>
+                          offer.category == entry.$2 && offer.available > 0,
+                    )
+                    .length;
+                return InkWell(
+                  onTap: () {
+                    ClientExperienceScope.of(context).setFilters(
+                      distance: 5,
+                      price: 30,
+                      categories: {entry.$2},
+                      available: false,
+                      allPrices: true,
+                    );
+                    go(context, DropScreen.flashOffers);
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 52,
+                          height: 52,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: mint,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Icon(entry.$3, color: forest, size: 28),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(entry.$1, style: strongStyle),
+                              const SizedBox(height: 3),
+                              Text(
+                                '$count panier${count > 1 ? 's' : ''} disponible${count > 1 ? 's' : ''}',
+                                style: copyStyle.copyWith(fontSize: 12),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const Icon(Icons.chevron_right, color: muted),
+                      ],
+                    ),
                   ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(entry.$2, size: 44, color: forest),
-                      const SizedBox(height: 10),
-                      Text(
-                        entry.$1,
-                        style: strongStyle,
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            )
-            .toList(),
+                );
+              },
+            ),
+            const Divider(height: 1, color: line),
+          ],
+        ],
       ),
     ],
   );
@@ -570,8 +814,11 @@ class OfferDetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final offer = offers[0];
     final controller = ClientExperienceScope.of(context);
+    final offer = offers.firstWhere(
+      (item) => item.id == controller.selectedOfferId,
+      orElse: () => offers.first,
+    );
     return PageScroll(
       padding: const EdgeInsets.fromLTRB(16, 10, 16, 20),
       children: [
@@ -639,7 +886,10 @@ class OfferDetailPage extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         InkWell(
-          onTap: () => go(context, DropScreen.shopDetail),
+          onTap: () {
+            controller.selectShop(offer.shopId);
+            go(context, DropScreen.shopDetail);
+          },
           child: SurfaceCard(
             child: Row(
               children: [

@@ -1,6 +1,7 @@
 class FlashOffer {
   const FlashOffer({
     required this.id,
+    this.shopId = '',
     required this.name,
     required this.category,
     required this.shop,
@@ -12,9 +13,12 @@ class FlashOffer {
     required this.distance,
     required this.available,
     required this.description,
+    this.pickupToday = true,
+    this.pickupLimit = '19h30',
   });
 
   final String id;
+  final String shopId;
   final String name;
   final String category;
   final String shop;
@@ -26,10 +30,13 @@ class FlashOffer {
   final double distance;
   final int available;
   final String description;
+  final bool pickupToday;
+  final String pickupLimit;
 }
 
 class LocalShop {
   const LocalShop({
+    this.id = '',
     required this.name,
     required this.category,
     required this.address,
@@ -38,6 +45,7 @@ class LocalShop {
     required this.description,
   });
 
+  final String id;
   final String name;
   final String category;
   final String address;
