@@ -90,3 +90,103 @@ class CheckoutPage extends StatelessWidget {
     ]);
   }
 }
+
+/// 24 · Moyen de paiement
+class PaymentPage extends StatefulWidget {
+  const PaymentPage({super.key});
+  @override
+  State<PaymentPage> createState() => _PaymentPageState();
+}
+
+class _PaymentPageState extends State<PaymentPage> {
+  final form = GlobalKey<FormState>();
+  final number = TextEditingController();
+  final expiry = TextEditingController();
+  final cvc = TextEditingController();
+
+  @override
+  void dispose() {
+    number.dispose(); expiry.dispose(); cvc.dispose();
+    super.dispose();
+  }
+
+  /// Les champs ne sont contrôlés que si une nouvelle carte est saisie.
+  bool get adding => [number, expiry, cvc].any((c) => c.text.trim().isNotEmpty);
+
+  String? validNumber(String? value) {
+    if (!adding) return null;
+    final digits = (value ?? '').replaceAll(RegExp(r'[\s-]'), '');
+    return RegExp(r'^\d{13,19}$').hasMatch(digits) && luhnValid(digits) ? null : 'Vérifiez le numéro de carte.';
+  }
+
+  String? validExpiry(String? value) {
+    if (!adding) return null;
+    final match = RegExp(r'^(\d{2})\s*/\s*(\d{2})$').firstMatch((value ?? '').trim());
+    if (match == null) return 'Format MM/AA.';
+    final month = int.parse(match[1]!);
+    final year = 2000 + int.parse(match[2]!);
+    if (month < 1 || month > 12) return 'Mois invalide.';
+    final now = DateTime.now();
+    if (year < now.year || (year == now.year && month < now.month)) return 'Carte expirée.';
+    return null;
+  }
+
+  String? validCvc(String? value) {
+    if (!adding) return null;
+    return RegExp(r'^\d{3,4}$').hasMatch((value ?? '').trim()) ? null : '3 ou 4 chiffres.';
+  }
+
+  void pay(AchatBoutiqueController state) {
+    if (adding) {
+      if (!form.currentState!.validate()) return;
+      state.addCard(number.text, expiry.text.replaceAll(' ', ''));
+    }
+    jumpAya(context, AyaScreen.orderConfirmed);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final state = AchatBoutiqueScope.of(context);
+    final cards = state.cards;
+    return PageScroll(children: [
+      const SectionTitle('Moyen de paiement'),
+      for (var i = 0; i < cards.length; i++) Padding(padding: const EdgeInsets.only(bottom: 10),
+        child: Semantics(selected: i == state.selectedCard, button: true,
+          child: InkWell(borderRadius: BorderRadius.circular(16), onTap: () => state.selectCard(i),
+            child: SurfaceCard(child: StackColumn(gap: 4, [
+              Row(children: [
+                const Icon(Icons.credit_card_rounded, size: 22, color: ink),
+                const SizedBox(width: 8),
+                Expanded(child: Text('${cards[i].brand} ···· ${cards[i].last4}',
+                  style: strongStyle.copyWith(fontSize: 18))),
+                if (i == state.selectedCard) const StatusPill('Sélectionnée'),
+              ]),
+              Text('Expire ${cards[i].expiry}', style: copyStyle.copyWith(fontSize: 13)),
+            ]))))),
+      SurfaceCard(child: Form(key: form, child: StackColumn(gap: 12, [
+        Row(children: [
+          const Icon(Icons.add_rounded, color: ink),
+          const SizedBox(width: 6),
+          Expanded(child: Text('Ajouter une carte', style: strongStyle.copyWith(fontSize: 18))),
+        ]),
+        const Divider(height: 4, color: line),
+        DropField('Numéro de carte', controller: number, hint: '0000 0000 0000 0000',
+          icon: Icons.credit_card_rounded, keyboard: TextInputType.number, validate: validNumber,
+          autofill: const [AutofillHints.creditCardNumber]),
+        Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Expanded(child: DropField('Expiration', controller: expiry, hint: 'MM/AA',
+            keyboard: TextInputType.datetime, validate: validExpiry,
+            autofill: const [AutofillHints.creditCardExpirationDate])),
+          const SizedBox(width: 12),
+          Expanded(child: DropField('CVC', controller: cvc, hint: '123', keyboard: TextInputType.number,
+            validate: validCvc, action: TextInputAction.done,
+            autofill: const [AutofillHints.creditCardSecurityCode])),
+        ]),
+      ]))),
+      const SizedBox(height: 14),
+      const InfoBanner('Paiement sécurisé et chiffré'),
+      const SizedBox(height: 14),
+      DropButton('Payer ${euros(state.total)}', icon: Icons.lock_outline_rounded, onPressed: () => pay(state)),
+    ]);
+  }
+}
