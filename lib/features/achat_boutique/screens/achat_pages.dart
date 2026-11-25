@@ -254,3 +254,43 @@ class PickupPassPage extends StatelessWidget {
     ]);
   }
 }
+
+/// 27 · Itinéraire
+class DirectionsPage extends StatelessWidget {
+  const DirectionsPage({super.key});
+  @override
+  Widget build(BuildContext context) {
+    final offer = AchatBoutiqueScope.of(context).offer;
+    return PageScroll(children: [
+      NeighbourhoodMap(shopLabel: 'Boulangerie · ${offer.distance} m'),
+      const SizedBox(height: 12),
+      Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+        decoration: BoxDecoration(borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: const Color(0xFFCFDDD4))),
+        // Une seule ligne, réduite si l’écran est trop étroit.
+        child: FittedBox(fit: BoxFit.scaleDown, child: Row(mainAxisSize: MainAxisSize.min, children: [
+          const Icon(Icons.location_on_outlined, size: 20, color: ink),
+          const SizedBox(width: 8),
+          const Text('Votre position', style: TextStyle(fontSize: 13, color: Color(0xFF34443B))),
+          const SizedBox(width: 16),
+          const Icon(Icons.arrow_forward_rounded, size: 15, color: ink),
+          const SizedBox(width: 16),
+          Text(offer.shop, style: const TextStyle(fontSize: 13, color: ink)),
+        ])),
+      ),
+      const SizedBox(height: 12),
+      SurfaceCard(child: StackColumn(gap: 2, [
+        ValueRow('À pied', '${offer.walkMinutes} min · ${offer.distance} m', size: 15),
+        ValueRow('Adresse', offer.street, size: 15),
+        ValueRow('Retrait avant', '', size: 15,
+          valueWidget: StatusPill(pickupTime(offer.pickupUntil), warm: true)),
+      ])),
+      const SizedBox(height: 14),
+      DropButton('Afficher mon pass de retrait', icon: Icons.qr_code_2_rounded,
+        onPressed: () => Navigator.of(context).canPop()
+            ? Navigator.of(context).pop()
+            : goAya(context, AyaScreen.pickupPass, replace: true)),
+    ]);
+  }
+}
