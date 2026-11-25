@@ -190,3 +190,27 @@ class _PaymentPageState extends State<PaymentPage> {
     ]);
   }
 }
+
+/// 25 · Commande confirmée
+class OrderConfirmedPage extends StatelessWidget {
+  const OrderConfirmedPage({super.key});
+  @override
+  Widget build(BuildContext context) {
+    final state = AchatBoutiqueScope.of(context);
+    return SuccessLayout(icon: Icons.check_rounded, title: 'Commande confirmée !',
+      subtitle: 'Votre panier est réservé et payé.', children: [
+        SurfaceCard(child: StackColumn(gap: 2, [
+          ValueRow('Commande', '#${state.orderNumber}', valueColor: ink),
+          ValueRow(state.offer.shop, euros(state.total)),
+          const SizedBox(height: 8),
+          InfoBanner('À retirer avant ${pickupTime(state.offer.pickupUntil)}', warm: true),
+        ])),
+        const SizedBox(height: 18),
+        DropButton('Afficher mon QR code', icon: Icons.qr_code_2_rounded,
+          onPressed: () => goAya(context, AyaScreen.pickupPass)),
+        const SizedBox(height: 10),
+        DropButton('Retour à l’accueil', style: ActionStyle.outline,
+          onPressed: () => openTeamLink(context, TeamLink.clientHome)),
+      ]);
+  }
+}
