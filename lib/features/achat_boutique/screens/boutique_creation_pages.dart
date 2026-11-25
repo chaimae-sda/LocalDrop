@@ -146,3 +146,80 @@ class ShopReadyPage extends StatelessWidget {
       ]);
   }
 }
+
+/// 45 · Tableau de bord
+class DashboardPage extends StatelessWidget {
+  const DashboardPage({super.key});
+  @override
+  Widget build(BuildContext context) {
+    final state = AchatBoutiqueScope.of(context);
+    final live = state.live;
+    return PageScroll(children: [
+      Container(
+        padding: const EdgeInsets.fromLTRB(18, 18, 18, 20),
+        decoration: BoxDecoration(color: forest, borderRadius: BorderRadius.circular(18)),
+        child: StackColumn(gap: 6, [
+          Text('Bonjour, ${state.merchantName}', style: const TextStyle(color: Color(0xFFD5E5DB), fontSize: 14)),
+          Text(state.shop.name, style: headingStyle.copyWith(color: Colors.white, fontSize: 25)),
+          const Text('Une belle journée pour réduire le gaspillage.',
+            style: TextStyle(color: Color(0xFFD5E5DB), fontSize: 13)),
+        ]),
+      ),
+      const SizedBox(height: 12),
+      Row(children: [
+        Expanded(child: _StatTile(Icons.shopping_cart_outlined, '${state.sold} / ${live.quantity}', 'Paniers vendus')),
+        const SizedBox(width: 12),
+        Expanded(child: _StatTile(Icons.show_chart_rounded, euros(state.sold * live.price, compact: true), 'Ventes du jour')),
+      ]),
+      const SizedBox(height: 12),
+      Row(children: [
+        Expanded(child: _StatTile(Icons.qr_code_scanner_rounded, '${state.sold}', 'À remettre')),
+        const SizedBox(width: 12),
+        Expanded(child: _StatTile(Icons.schedule_rounded, pickupTime(live.pickupUntil), 'Fin de vitrine')),
+      ]),
+      const SizedBox(height: 14),
+      DropButton('Publier une Vitrine Flash', icon: Icons.bolt_outlined,
+        onPressed: () => goAya(context, AyaScreen.newShowcase)),
+      const SizedBox(height: 12),
+      const SectionTitle('Vitrine du jour', trailing: Text('En cours',
+        style: TextStyle(color: success, fontSize: 13, fontWeight: FontWeight.w600))),
+      SurfaceCard(child: StackColumn(gap: 8, [
+        Row(children: [
+          Expanded(child: Text(live.title, style: strongStyle.copyWith(fontSize: 17))),
+          const SizedBox(width: 8),
+          const StatusPill('ACTIVE', solid: true),
+        ]),
+        Text('${state.sold} panier${state.sold > 1 ? 's' : ''} vendu${state.sold > 1 ? 's' : ''} sur ${live.quantity}'
+          ' · Retrait avant ${pickupTime(live.pickupUntil)}', style: copyStyle.copyWith(fontSize: 13)),
+        ProgressLine(state.sold / live.quantity, label: 'Paniers vendus'),
+        const SizedBox(height: 2),
+        DropButton('Voir ma vitrine', icon: Icons.chevron_right_rounded, style: ActionStyle.outline,
+          onPressed: () => openTeamLink(context, TeamLink.activeShowcase)),
+      ])),
+      const SizedBox(height: 12),
+      const SectionTitle('Commandes récentes'),
+      for (final order in state.recentOrders.take(state.sold))
+        AccountRow(Icons.receipt_long_outlined, 'Commande #${order.number}',
+          '${order.customer} · ${euros(order.price)} · retrait ${pickupTime(order.pickup)}',
+          () => openTeamLink(context, TeamLink.merchantOrderDetail)),
+    ]);
+  }
+}
+
+class _StatTile extends StatelessWidget {
+  const _StatTile(this.icon, this.value, this.label);
+  final IconData icon;
+  final String value, label;
+  @override
+  Widget build(BuildContext context) => Semantics(label: '$label : $value', excludeSemantics: true,
+    child: Container(
+      padding: const EdgeInsets.fromLTRB(14, 14, 14, 16),
+      decoration: BoxDecoration(color: mint, borderRadius: BorderRadius.circular(16)),
+      child: StackColumn(gap: 6, [
+        Align(alignment: Alignment.centerLeft, child: Icon(icon, size: 22, color: forest)),
+        FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft,
+          child: Text(value, style: headingStyle.copyWith(fontSize: 27, color: forest, letterSpacing: -.6))),
+        Text(label, style: copyStyle.copyWith(fontSize: 12, height: 1.2)),
+      ]),
+    ));
+}
