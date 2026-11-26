@@ -11,7 +11,7 @@ Frontend Flutter en français. Le projet s’ouvre dans VS Code à la racine du 
 
 Le lancement depuis le terminal est également possible avec `flutter run -d chrome` ou `flutter run -d edge`.
 
-Pour consulter les planches de référence immédiatement, ouvrez [l’aperçu hors ligne](apercu/index.html) dans votre navigateur ou utilisez la configuration **LocalDrop · Maquettes hors ligne**. Le sélecteur, les flèches et les zones de navigation permettent de passer d’une maquette à l’autre. Les champs modifiables et les validations font partie de la version Flutter.
+Pour ouvrir la démo Flutter commune de Chaimae, Layla et Aya sous Windows, utilisez `Demo-LocalDrop.cmd`.
 
 ## Parcourir la démo
 

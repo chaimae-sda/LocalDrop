@@ -16,12 +16,6 @@
       "deviceId": "edge",
       "program": "lib/main.dart",
       "cwd": "${workspaceFolder}"
-    },
-    {
-      "name": "LocalDrop · Maquettes hors ligne",
-      "request": "launch",
-      "type": "chrome",
-      "file": "${workspaceFolder}/apercu/index.html"
     }
   ]
 }
