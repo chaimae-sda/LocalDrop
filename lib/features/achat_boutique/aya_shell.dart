@@ -144,6 +144,14 @@ const _merchantTabs = <_Tab>[
   ('Profil', Icons.person_outline_rounded, AyaScreen.shopProfile),
 ];
 
+/// Navigation commerçant commune à la publication et à l’exploitation.
+class MerchantTabs extends StatelessWidget {
+  const MerchantTabs(this.active, {super.key});
+  final int active;
+  @override
+  Widget build(BuildContext context) => _AyaBottomBar(_merchantTabs, active: active);
+}
+
 class _AyaBottomBar extends StatelessWidget {
   const _AyaBottomBar(this.items, {required this.active});
   final List<_Tab> items;

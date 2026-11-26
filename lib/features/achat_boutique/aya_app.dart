@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 import '../../src/ui.dart';
+import '../gestion_commercant/merchant_shell.dart';
 import 'aya_screens.dart';
 import 'aya_shell.dart';
 import 'controllers/achat_boutique_controller.dart';
@@ -33,7 +34,8 @@ Widget ayaPage(AyaScreen screen) => switch (screen) {
 
 /// Application des 18 écrans d’Aya, lancée par `lib/main_aya.dart`.
 class AyaApp extends StatefulWidget {
-  const AyaApp({super.key, this.startAt});
+  const AyaApp({super.key, this.startAt, this.initialRoute});
+  final String? initialRoute;
   final AyaScreen? startAt;
   @override
   State<AyaApp> createState() => _AyaAppState();
@@ -49,6 +51,8 @@ class _AyaAppState extends State<AyaApp> {
   }
 
   Route<void> routeFor(RouteSettings settings) {
+    final merchant = merchantRouteFor(settings);
+    if (merchant != null) return merchant;
     final screen = AyaScreen.fromRoute(settings.name) ?? AyaScreen.cart;
     return PageRouteBuilder<void>(
       settings: RouteSettings(name: screen.route),
@@ -64,7 +68,7 @@ class _AyaAppState extends State<AyaApp> {
     title: 'LocalDrop', theme: dropTheme(), debugShowCheckedModeBanner: false,
     locale: const Locale('fr'), supportedLocales: const [Locale('fr')],
     localizationsDelegates: GlobalMaterialLocalizations.delegates,
-    initialRoute: (widget.startAt ?? AyaScreen.cart).route,
+    initialRoute: widget.initialRoute ?? (widget.startAt ?? AyaScreen.cart).route,
     onGenerateInitialRoutes: (initial) => [routeFor(RouteSettings(name: initial))],
     onGenerateRoute: routeFor,
   ));

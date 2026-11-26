@@ -4,6 +4,7 @@ import '../../src/ui.dart';
 import '../../src/screens.dart';
 import '../../src/navigation.dart';
 import '../../src/demo.dart';
+import '../gestion_commercant/merchant_screen.dart';
 import 'aya_screens.dart';
 
 void goAya(BuildContext context, AyaScreen screen, {bool replace = false}) {
@@ -50,8 +51,13 @@ void openDestination(BuildContext context, Object target) {
   }
 }
 
-/// Les écrans des autres membres seront reliés lors de la réunion des branches.
-Future<void> openTeamLink(BuildContext context, TeamLink link) async {
+/// Résout les destinations dans le parcours commerçant ou l’application commune.
+Future<void> openTeamLink(BuildContext context, TeamLink link, {int? order}) async {
+  final merchant = MerchantScreen.fromRoute('/${link.id}');
+  if (merchant != null) {
+    openMerchant(context, merchant, order: order);
+    return;
+  }
   final route = switch (link) {
     TeamLink.clientHome => DropScreen.aroundMe,
     TeamLink.offerDetail => DropScreen.offerDetail,
