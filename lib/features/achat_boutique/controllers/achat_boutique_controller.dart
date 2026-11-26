@@ -6,7 +6,7 @@ import '../models/achat_boutique_models.dart';
 /// effectué et aucun numéro de carte complet n’est conservé.
 class AchatBoutiqueController extends ChangeNotifier {
   // ---------- Achat client (22 à 27) ----------
-  final offer = const BasketOffer(
+  BasketOffer offer = const BasketOffer(
     title: 'Panier Baguettes & Tartes', shop: 'Boulangerie de la Place',
     address: '12, Rue du Commerce, 75001 Paris', price: 6,
     pickupFrom: TimeOfDay(hour: 18, minute: 45), pickupUntil: TimeOfDay(hour: 19, minute: 30),

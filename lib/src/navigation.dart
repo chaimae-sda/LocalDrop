@@ -26,7 +26,8 @@ void goBack(BuildContext context, DropScreen fallback) {
   }
 }
 
-typedef TeamNavigator = void Function(BuildContext context, TeamScreen destination);
+typedef TeamNavigator =
+    void Function(BuildContext context, TeamScreen destination);
 
 class TeamRoutes extends InheritedWidget {
   const TeamRoutes({super.key, this.onOpen, required super.child});
@@ -40,6 +41,10 @@ Future<void> openTeam(BuildContext context, TeamScreen screen) async {
   final handler = context.getInheritedWidgetOfExactType<TeamRoutes>()?.onOpen;
   if (handler != null) {
     handler(context, screen);
+    return;
+  }
+  if (screen == TeamScreen.merchantSetup) {
+    Navigator.of(context).pushNamed('/${screen.id}');
     return;
   }
   final destination = switch (screen) {
@@ -56,20 +61,32 @@ Future<void> openTeam(BuildContext context, TeamScreen screen) async {
     return;
   }
   final openProfile = await showModalBottomSheet<bool>(
-    context: context, showDragHandle: true, useSafeArea: true,
+    context: context,
+    showDragHandle: true,
+    useSafeArea: true,
     constraints: const BoxConstraints(maxWidth: 430),
     builder: (sheet) => Padding(
       padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
       child: StackColumn([
         Text(screen.label, style: headingStyle.copyWith(fontSize: 24)),
-        Text('Cet écran appartient au parcours ${screen == TeamScreen.merchantSetup ? 'commerçant' : 'de découverte client'} de l’équipe. Vous pouvez continuer la visite dans le profil client.', style: copyStyle),
-        DropButton('Voir le profil client', icon: Icons.person_outline_rounded,
-            onPressed: () => Navigator.pop(sheet, true)),
-        TextButton(onPressed: () => Navigator.pop(sheet, false), child: const Text('Revenir à cet écran')),
+        Text(
+          'Cet écran appartient au parcours ${screen == TeamScreen.merchantSetup ? 'commerçant' : 'de découverte client'} de l’équipe. Vous pouvez continuer la visite dans le profil client.',
+          style: copyStyle,
+        ),
+        DropButton(
+          'Voir le profil client',
+          icon: Icons.person_outline_rounded,
+          onPressed: () => Navigator.pop(sheet, true),
+        ),
+        TextButton(
+          onPressed: () => Navigator.pop(sheet, false),
+          child: const Text('Revenir à cet écran'),
+        ),
       ]),
     ),
   );
-  if (openProfile == true && context.mounted &&
+  if (openProfile == true &&
+      context.mounted &&
       ModalRoute.of(context)?.settings.name != DropScreen.profile.route) {
     go(context, DropScreen.profile);
   }

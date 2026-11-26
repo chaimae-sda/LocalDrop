@@ -7,6 +7,11 @@ import '../controllers/client_controller.dart';
 import '../data/sample_data.dart';
 import '../models/client_models.dart';
 import 'preferences_pages.dart';
+import '../../achat_boutique/aya_navigation.dart';
+import '../../achat_boutique/aya_screens.dart';
+import '../../achat_boutique/controllers/achat_boutique_controller.dart';
+import '../../achat_boutique/models/achat_boutique_models.dart'
+    show BasketOffer;
 
 Widget _productImage(FlashOffer offer, {double height = 150}) => ClipRRect(
   borderRadius: BorderRadius.circular(12),
@@ -931,21 +936,20 @@ class OfferDetailPage extends StatelessWidget {
           'Réserver cette offre',
           icon: Icons.shopping_bag_outlined,
           onPressed: () {
-            showDialog<void>(
-              context: context,
-              builder: (dialog) => AlertDialog(
-                title: const Text('Réservation confirmée'),
-                content: const Text(
-                  'Votre panier est réservé jusqu’à 19h30. Présentez-vous au commerce pour finaliser le retrait.',
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(dialog),
-                    child: const Text('OK'),
-                  ),
-                ],
-              ),
+            final time = offer.pickupLimit.split('h');
+            final hour = int.tryParse(time.first) ?? 19;
+            final minute = int.tryParse(time.last) ?? 30;
+            AchatBoutiqueScope.of(context).offer = BasketOffer(
+              title: offer.name,
+              shop: offer.shop,
+              address: offer.address,
+              price: offer.price,
+              pickupFrom: TimeOfDay(hour: hour, minute: 0),
+              pickupUntil: TimeOfDay(hour: hour, minute: minute),
+              distance: (offer.distance * 1000).round(),
+              walkMinutes: (offer.distance * 12).ceil(),
             );
+            goAya(context, AyaScreen.cart);
           },
         ),
       ],

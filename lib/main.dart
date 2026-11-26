@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
+import 'features/achat_boutique/aya_app.dart';
+import 'features/achat_boutique/aya_screens.dart';
+import 'features/achat_boutique/aya_shell.dart';
+import 'features/achat_boutique/controllers/achat_boutique_controller.dart';
 import 'src/account_pages.dart';
 import 'src/auth_pages.dart';
 import 'src/demo.dart';
@@ -27,16 +31,25 @@ class LocalDropApp extends StatefulWidget {
 }
 
 class _LocalDropAppState extends State<LocalDropApp> {
+  final achatBoutique = AchatBoutiqueController();
   final account = DemoAccount();
   final clientExperience = ClientExperienceController();
   @override
   void dispose() {
+    achatBoutique.dispose();
     account.dispose();
     clientExperience.dispose();
     super.dispose();
   }
 
   Route<void> routeFor(RouteSettings settings) {
+    final aya = AyaScreen.fromRoute(settings.name);
+    if (aya != null) {
+      return MaterialPageRoute<void>(
+        settings: RouteSettings(name: aya.route),
+        builder: (_) => AyaShell(screen: aya, child: ayaPage(aya)),
+      );
+    }
     final screen = DropScreen.fromRoute(settings.name) ?? DropScreen.splash;
     final page = switch (screen) {
       DropScreen.splash => const SplashPage(),
@@ -87,24 +100,27 @@ class _LocalDropAppState extends State<LocalDropApp> {
   }
 
   @override
-  Widget build(BuildContext context) => DemoScope(
-    account: account,
-    child: ClientExperienceScope(
-      controller: clientExperience,
-      child: TeamRoutes(
-        onOpen: widget.onTeamRoute,
-        child: MaterialApp(
-          title: 'LocalDrop',
-          theme: dropTheme(),
-          debugShowCheckedModeBanner: false,
-          locale: const Locale('fr'),
-          supportedLocales: const [Locale('fr')],
-          localizationsDelegates: GlobalMaterialLocalizations.delegates,
-          initialRoute: widget.startAt?.route,
-          onGenerateInitialRoutes: (initial) => [
-            routeFor(RouteSettings(name: initial)),
-          ],
-          onGenerateRoute: routeFor,
+  Widget build(BuildContext context) => AchatBoutiqueScope(
+    controller: achatBoutique,
+    child: DemoScope(
+      account: account,
+      child: ClientExperienceScope(
+        controller: clientExperience,
+        child: TeamRoutes(
+          onOpen: widget.onTeamRoute,
+          child: MaterialApp(
+            title: 'LocalDrop',
+            theme: dropTheme(),
+            debugShowCheckedModeBanner: false,
+            locale: const Locale('fr'),
+            supportedLocales: const [Locale('fr')],
+            localizationsDelegates: GlobalMaterialLocalizations.delegates,
+            initialRoute: widget.startAt?.route,
+            onGenerateInitialRoutes: (initial) => [
+              routeFor(RouteSettings(name: initial)),
+            ],
+            onGenerateRoute: routeFor,
+          ),
         ),
       ),
     ),
