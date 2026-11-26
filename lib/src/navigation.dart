@@ -42,6 +42,19 @@ Future<void> openTeam(BuildContext context, TeamScreen screen) async {
     handler(context, screen);
     return;
   }
+  final destination = switch (screen) {
+    TeamScreen.clientHome => DropScreen.aroundMe,
+    TeamScreen.explore => DropScreen.flashOffers,
+    TeamScreen.orders => DropScreen.orders,
+    TeamScreen.favorites => DropScreen.favorites,
+    TeamScreen.notifications => DropScreen.notifications,
+    TeamScreen.settings => DropScreen.settings,
+    TeamScreen.merchantSetup => null,
+  };
+  if (destination != null) {
+    go(context, destination);
+    return;
+  }
   final openProfile = await showModalBottomSheet<bool>(
     context: context, showDragHandle: true, useSafeArea: true,
     constraints: const BoxConstraints(maxWidth: 430),

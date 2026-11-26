@@ -100,7 +100,7 @@ class _LocalDropAppState extends State<LocalDropApp> {
           locale: const Locale('fr'),
           supportedLocales: const [Locale('fr')],
           localizationsDelegates: GlobalMaterialLocalizations.delegates,
-          initialRoute: widget.startAt?.route ?? DropScreen.aroundMe.route,
+          initialRoute: widget.startAt?.route,
           onGenerateInitialRoutes: (initial) => [
             routeFor(RouteSettings(name: initial)),
           ],

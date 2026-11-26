@@ -3,6 +3,7 @@ name: Vérifier et compiler LocalDrop
 on:
   push:
     branches:
+      - main
       - feat/chaimae-auth-profil-flutter
   workflow_dispatch:
 

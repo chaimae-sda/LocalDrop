@@ -80,6 +80,8 @@ void main() {
       find.text('Remplir avec le compte de démonstration'),
     );
     await tapVisible(tester, find.text('Se connecter'));
+    expect(tester.widget<ScreenShell>(find.byType(ScreenShell)).screen, DropScreen.aroundMe);
+    await tapVisible(tester, find.text('Profil').last);
     expect(find.text('Camille Martin'), findsOneWidget);
     await tapVisible(tester, find.text('Mes informations'));
     await tester.enterText(find.byType(TextFormField).first, 'Chaimae Test');

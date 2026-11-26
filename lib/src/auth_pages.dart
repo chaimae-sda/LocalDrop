@@ -56,7 +56,7 @@ class _AuthPageState extends State<AuthPage> {
       if (route != null) {
         route(context, TeamScreen.clientHome);
       } else {
-        jump(context, DropScreen.profile);
+        jump(context, DropScreen.aroundMe);
       }
     } else {
       account.register(
