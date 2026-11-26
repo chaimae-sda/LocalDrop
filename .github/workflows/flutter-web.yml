@@ -52,6 +52,11 @@ jobs:
         with:
           flutter-version: '3.32.8'
           cache: true
+      - uses: actions/setup-java@v4
+        if: runner.os == 'Linux'
+        with:
+          distribution: temurin
+          java-version: '17'
       - run: dart tool/prepare_mobile.dart
       - run: flutter pub get
       - run: flutter build ${{ matrix.target }} ${{ matrix.options }}

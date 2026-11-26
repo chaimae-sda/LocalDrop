@@ -10,8 +10,8 @@ import 'preferences_pages.dart';
 
 Widget _productImage(FlashOffer offer, {double height = 150}) => ClipRRect(
   borderRadius: BorderRadius.circular(12),
-  child: Image.network(
-    '${offer.imageUrl}?auto=format&fit=crop&w=800&q=80',
+  child: Image.asset(
+    offer.imageUrl,
     height: height,
     width: double.infinity,
     fit: BoxFit.cover,
