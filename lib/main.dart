@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'features/achat_boutique/aya_app.dart';
+import 'features/gestion_commercant/merchant_shell.dart' show merchantRouteFor;
 import 'features/achat_boutique/aya_screens.dart';
 import 'features/achat_boutique/aya_shell.dart';
 import 'features/achat_boutique/controllers/achat_boutique_controller.dart';
@@ -22,7 +23,8 @@ import 'features/client_experience/screens/preferences_pages.dart';
 void main() => runApp(const LocalDropApp());
 
 class LocalDropApp extends StatefulWidget {
-  const LocalDropApp({super.key, this.startAt, this.onTeamRoute});
+  const LocalDropApp({super.key, this.startAt, this.onTeamRoute, this.initialRoute});
+  final String? initialRoute;
   final DropScreen? startAt;
   final TeamNavigator? onTeamRoute;
 
@@ -43,6 +45,8 @@ class _LocalDropAppState extends State<LocalDropApp> {
   }
 
   Route<void> routeFor(RouteSettings settings) {
+    final merchant = merchantRouteFor(settings);
+    if (merchant != null) return merchant;
     final aya = AyaScreen.fromRoute(settings.name);
     if (aya != null) {
       return MaterialPageRoute<void>(
@@ -115,7 +119,7 @@ class _LocalDropAppState extends State<LocalDropApp> {
             locale: const Locale('fr'),
             supportedLocales: const [Locale('fr')],
             localizationsDelegates: GlobalMaterialLocalizations.delegates,
-            initialRoute: widget.startAt?.route,
+            initialRoute: widget.initialRoute ?? widget.startAt?.route,
             onGenerateInitialRoutes: (initial) => [
               routeFor(RouteSettings(name: initial)),
             ],

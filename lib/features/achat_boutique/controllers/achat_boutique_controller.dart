@@ -1,10 +1,21 @@
 import 'package:flutter/material.dart';
 
+import '../../gestion_commercant/merchant_operations.dart';
 import '../models/achat_boutique_models.dart';
 
 /// Données fictives des écrans d’Aya pour la session. Aucun paiement réel n’est
 /// effectué et aucun numéro de carte complet n’est conservé.
-class AchatBoutiqueController extends ChangeNotifier {
+class AchatBoutiqueController extends ChangeNotifier with MerchantOperations {
+  AchatBoutiqueController() {
+    tickets = List.unmodifiable([
+      for (final order in recentOrders.reversed)
+        PickupTicket(order, live.title, order.number == orderNumber ? pickupCode : '5732'),
+    ]);
+  }
+
+  @override
+  late final List<PickupTicket> tickets;
+
   // ---------- Achat client (22 à 27) ----------
   BasketOffer offer = const BasketOffer(
     title: 'Panier Baguettes & Tartes', shop: 'Boulangerie de la Place',
@@ -95,9 +106,11 @@ class AchatBoutiqueController extends ChangeNotifier {
   void choosePhoto(PhotoSource source) => updateDraft(draft.copyWith(photo: source));
 
   void publish() {
+    archiveLive();
     live = draft;
     sold = 0;
     draft = _newDraft();
+    schedulePublishedShowcase();
     notifyListeners();
   }
 

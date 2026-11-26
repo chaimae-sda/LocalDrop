@@ -169,11 +169,11 @@ class DashboardPage extends StatelessWidget {
       Row(children: [
         Expanded(child: _StatTile(Icons.shopping_cart_outlined, '${state.sold} / ${live.quantity}', 'Paniers vendus')),
         const SizedBox(width: 12),
-        Expanded(child: _StatTile(Icons.show_chart_rounded, euros(state.sold * live.price, compact: true), 'Ventes du jour')),
+        Expanded(child: _StatTile(Icons.show_chart_rounded, euros(state.dayCents / 100, compact: true), 'Ventes du jour')),
       ]),
       const SizedBox(height: 12),
       Row(children: [
-        Expanded(child: _StatTile(Icons.qr_code_scanner_rounded, '${state.sold}', 'À remettre')),
+        Expanded(child: _StatTile(Icons.qr_code_scanner_rounded, '${state.pending.length}', 'À remettre')),
         const SizedBox(width: 12),
         Expanded(child: _StatTile(Icons.schedule_rounded, pickupTime(live.pickupUntil), 'Fin de vitrine')),
       ]),
@@ -181,13 +181,13 @@ class DashboardPage extends StatelessWidget {
       DropButton('Publier une Vitrine Flash', icon: Icons.bolt_outlined,
         onPressed: () => goAya(context, AyaScreen.newShowcase)),
       const SizedBox(height: 12),
-      const SectionTitle('Vitrine du jour', trailing: Text('En cours',
+      SectionTitle('Vitrine du jour', trailing: Text(state.closed ? 'Terminée' : 'En cours',
         style: TextStyle(color: success, fontSize: 13, fontWeight: FontWeight.w600))),
       SurfaceCard(child: StackColumn(gap: 8, [
         Row(children: [
           Expanded(child: Text(live.title, style: strongStyle.copyWith(fontSize: 17))),
           const SizedBox(width: 8),
-          const StatusPill('ACTIVE', solid: true),
+          StatusPill(state.closed ? 'TERMINÉE' : 'ACTIVE', solid: !state.closed),
         ]),
         Text('${state.sold} panier${state.sold > 1 ? 's' : ''} vendu${state.sold > 1 ? 's' : ''} sur ${live.quantity}'
           ' · Retrait avant ${pickupTime(live.pickupUntil)}', style: copyStyle.copyWith(fontSize: 13)),
@@ -198,10 +198,11 @@ class DashboardPage extends StatelessWidget {
       ])),
       const SizedBox(height: 12),
       const SectionTitle('Commandes récentes'),
-      for (final order in state.recentOrders.take(state.sold))
-        AccountRow(Icons.receipt_long_outlined, 'Commande #${order.number}',
-          '${order.customer} · ${euros(order.price)} · retrait ${pickupTime(order.pickup)}',
-          () => openTeamLink(context, TeamLink.merchantOrderDetail)),
+      for (final ticket in state.tickets.reversed)
+        AccountRow(Icons.receipt_long_outlined, 'Commande #${ticket.order.number}',
+          '${ticket.order.customer} · ${euros(ticket.order.price)} · '
+          '${state.isCollected(ticket) ? 'retirée' : 'retrait ${pickupTime(ticket.order.pickup)}'}',
+          () => openTeamLink(context, TeamLink.merchantOrderDetail, order: ticket.order.number)),
     ]);
   }
 }
