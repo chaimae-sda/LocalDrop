@@ -306,6 +306,7 @@ class _AccountNavigation extends StatelessWidget {
       ('Explorer', Icons.search_rounded, DropScreen.flashOffers),
       ('Commandes', Icons.receipt_long_outlined, DropScreen.orders),
       ('Favoris', Icons.favorite_border_rounded, DropScreen.favorites),
+      ('Profil', Icons.person_outline_rounded, DropScreen.profile),
     ];
     return DecoratedBox(
       decoration: const BoxDecoration(
